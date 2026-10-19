@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      full:
+        description: "Залить всю тему целиком"
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy
@@ -11,23 +16,69 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    env:
+      FTP_HOST: ${{ secrets.FTP_SERVER }}
+      FTP_USER: ${{ secrets.FTP_USERNAME }}
+      FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+      REMOTE_DIR: ${{ vars.FTP_SERVER_DIR || '.' }}
+      FTP_PROTOCOL: ${{ vars.FTP_PROTOCOL || 'ftps' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: PHP syntax check
         run: find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l > /dev/null
 
-      - name: Upload changed files over FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
-          server-dir: ${{ vars.FTP_SERVER_DIR || './' }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .github/**
-            README.md
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp > /dev/null
+
+      - name: Work out which files changed
+        id: diff
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ "${{ github.event_name }}" != "push" ] || [ "${{ inputs.full }}" = "true" ] \
+             || [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+            echo "Full upload"
+            exit 0
+          fi
+          echo "mode=diff" >> "$GITHUB_OUTPUT"
+          git diff --name-only --diff-filter=ACMRT "$BEFORE" "${{ github.sha }}" | grep -vE '^(\.github/|README\.md$|\.gitignore$)' > upload.txt || true
+          git diff --name-only --diff-filter=D "$BEFORE" "${{ github.sha }}" | grep -vE '^(\.github/|README\.md$|\.gitignore$)' > delete.txt || true
+          echo "Upload:"; cat upload.txt; echo "Delete:"; cat delete.txt
+
+      - name: Upload over FTP
+        run: |
+          {
+            echo "set net:max-retries 2; set net:timeout 30; set net:reconnect-interval-base 5"
+            echo "set ftp:passive-mode true"
+            if [ "$FTP_PROTOCOL" = "ftps" ]; then
+              echo "set ftp:ssl-force true; set ftp:ssl-protect-data true; set ftp:ssl-protect-list true"
+              echo "set ssl:check-hostname false"
+            else
+              echo "set ftp:ssl-allow false"
+            fi
+            echo "open -u \"$FTP_USER\",\"$FTP_PASS\" \"ftp://$FTP_HOST\""
+            echo "cd \"$REMOTE_DIR\""
+            if [ "${{ steps.diff.outputs.mode }}" = "full" ]; then
+              echo "mirror -R --verbose --parallel=4 --exclude-glob .git/ --exclude-glob .github/ --exclude-glob README.md --exclude-glob .gitignore --exclude-glob upload.txt --exclude-glob delete.txt ./ ./"
+            else
+              while IFS= read -r f; do
+                [ -z "$f" ] && continue
+                d=$(dirname "$f")
+                [ "$d" != "." ] && echo "mkdir -p -f \"$d\""
+                echo "put \"$f\" -o \"$f\""
+              done < upload.txt
+              while IFS= read -r f; do
+                [ -z "$f" ] && continue
+                echo "rm -f \"$f\""
+              done < delete.txt
+            fi
+            echo "bye"
+          } > script.lftp
+          grep -v '^open ' script.lftp
+          lftp -f script.lftp
+          rm -f script.lftp
