@@ -63,7 +63,9 @@ $phone2 = exprinto_opt( 'phone2' );
 						<li><?php echo exprinto_icon( 'phone', 18 ); // phpcs:ignore ?><a href="<?php echo esc_attr( exprinto_tel( $phone2 ) ); ?>"><?php echo esc_html( $phone2 ); ?></a></li>
 					<?php endif; ?>
 					<li><?php echo exprinto_icon( 'mail', 18 ); // phpcs:ignore ?><a href="mailto:<?php echo esc_attr( exprinto_opt( 'email' ) ); ?>"><?php echo esc_html( exprinto_opt( 'email' ) ); ?></a></li>
+<?php if ( exprinto_opt( 'address' ) ) : ?>
 					<li><?php echo exprinto_icon( 'pin', 18 ); // phpcs:ignore ?><span><?php echo esc_html( exprinto_opt( 'address' ) ); ?></span></li>
+<?php endif; ?>
 					<li><?php echo exprinto_icon( 'clock', 18 ); // phpcs:ignore ?><span><?php echo esc_html( exprinto_opt( 'hours' ) ); ?></span></li>
 				</ul>
 			</div>

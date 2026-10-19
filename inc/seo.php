@@ -253,26 +253,19 @@ function exprinto_schema_org() {
 		'priceRange'  => '37–240 BYN',
 		'currenciesAccepted' => 'BYN',
 		'paymentAccepted'    => 'Наличные, банковская карта, ЕРИП, безналичный расчёт',
-		'address'     => array(
-			'@type'           => 'PostalAddress',
-			'streetAddress'   => exprinto_opt( 'address' ),
-			'addressLocality' => exprinto_opt( 'city' ),
-			'addressCountry'  => 'BY',
-		),
-		'geo'         => array(
-			'@type'     => 'GeoCoordinates',
-			'latitude'  => exprinto_opt( 'lat' ),
-			'longitude' => exprinto_opt( 'lng' ),
-		),
 		'areaServed'  => array( '@type' => 'Country', 'name' => 'Беларусь' ),
 		'openingHoursSpecification' => array(
-			array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday' ), 'opens' => '09:00', 'closes' => '19:00' ),
-			array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'Saturday', 'opens' => '10:00', 'closes' => '15:00' ),
+			array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday' ), 'opens' => '09:00', 'closes' => '18:00' ),
 		),
 	);
 	if ( $same ) {
 		$org['sameAs'] = $same;
 	}
+	$addr = array( '@type' => 'PostalAddress', 'addressLocality' => exprinto_opt( 'city' ), 'addressCountry' => 'BY' );
+	if ( exprinto_opt( 'address' ) ) {
+		$addr['streetAddress'] = exprinto_opt( 'address' );
+	}
+	$org['address'] = $addr;
 	return $org;
 }
 
