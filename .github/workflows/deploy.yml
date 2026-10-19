@@ -50,6 +50,18 @@ jobs:
           git diff --name-only --diff-filter=D "$BEFORE" "${{ github.sha }}" | grep -vE '^(\.github/|README\.md$|\.gitignore$)' > delete.txt || true
           echo "Upload:"; cat upload.txt; echo "Delete:"; cat delete.txt
 
+      - name: Pin FTP server certificate
+        if: env.FTP_PROTOCOL == 'ftps'
+        env:
+          # SHA-1 отпечаток самоподписанного сертификата FTP-сервера хостинга.
+          # Если хостинг сменит сертификат, выкладка остановится — обновите значение.
+          FTP_CERT_SHA1: ${{ vars.FTP_CERT_SHA1 || '13:54:CA:9A:FC:EE:6D:B8:7D:54:0E:F8:73:C1:8D:4A:51:A7:10:DF' }}
+        run: |
+          echo | openssl s_client -starttls ftp -connect "$FTP_HOST:21" -servername "$FTP_HOST" 2>/dev/null | openssl x509 > ftp-cert.pem
+          FP=$(openssl x509 -in ftp-cert.pem -noout -fingerprint -sha1 | cut -d= -f2)
+          echo "Server certificate SHA-1: $FP"
+          if [ "$FP" != "$FTP_CERT_SHA1" ]; then echo "::error::FTP certificate fingerprint mismatch"; exit 1; fi
+
       - name: Upload over FTP
         run: |
           {
@@ -57,14 +69,14 @@ jobs:
             echo "set ftp:passive-mode true"
             if [ "$FTP_PROTOCOL" = "ftps" ]; then
               echo "set ftp:ssl-force true; set ftp:ssl-protect-data true; set ftp:ssl-protect-list true"
-              echo "set ssl:check-hostname false"
+              echo "set ssl:check-hostname false; set ssl:ca-file $PWD/ftp-cert.pem"
             else
               echo "set ftp:ssl-allow false"
             fi
             echo "open -u \"$FTP_USER\",\"$FTP_PASS\" \"ftp://$FTP_HOST\""
             echo "cd \"$REMOTE_DIR\""
             if [ "${{ steps.diff.outputs.mode }}" = "full" ]; then
-              echo "mirror -R --verbose --parallel=4 --exclude-glob .git/ --exclude-glob .github/ --exclude-glob README.md --exclude-glob .gitignore --exclude-glob upload.txt --exclude-glob delete.txt ./ ./"
+              echo "mirror -R --verbose --parallel=4 --exclude-glob .git/ --exclude-glob .github/ --exclude-glob README.md --exclude-glob .gitignore --exclude-glob upload.txt --exclude-glob delete.txt --exclude-glob ftp-cert.pem --exclude-glob script.lftp ./ ./"
             else
               while IFS= read -r f; do
                 [ -z "$f" ] && continue
