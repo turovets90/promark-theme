@@ -399,3 +399,46 @@ function exprinto_catalog_v3_update() {
 	}
 	update_option( 'exprinto_catalog_version', 3 );
 }
+
+/**
+ * v4: сняты с продажи две модели «Волна» 630×360 (синяя и коричневая).
+ * Товары перемещаются в корзину (их можно восстановить в админке: Товары → Корзина),
+ * а их адреса навсегда (301) перенаправляются в раздел «С объёмными буквами из акрила».
+ */
+function exprinto_removed_products() {
+	return array(
+		'adresnaya-tablichka-obemnye-bukvy-630x360-sinyaya',
+		'adresnaya-tablichka-obemnye-bukvy-630x360-korichnevaya',
+	);
+}
+
+add_action( 'init', function () {
+	if ( (int) get_option( 'exprinto_catalog_version' ) >= 4 ) {
+		return;
+	}
+	foreach ( exprinto_removed_products() as $slug ) {
+		$post = get_page_by_path( $slug, OBJECT, 'product' );
+		if ( $post && 'trash' !== $post->post_status ) {
+			wp_trash_post( $post->ID );
+		}
+	}
+	if ( function_exists( 'wc_delete_product_transients' ) ) {
+		wc_delete_product_transients();
+	}
+	update_option( 'exprinto_catalog_version', 4 );
+}, 20 );
+
+add_action( 'template_redirect', function () {
+	if ( ! is_404() ) {
+		return;
+	}
+	$path = trim( (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', PHP_URL_PATH ), '/' ); // phpcs:ignore
+	$slug = basename( $path );
+	if ( ! in_array( $slug, exprinto_removed_products(), true ) && ! in_array( preg_replace( '/__trashed$/', '', $slug ), exprinto_removed_products(), true ) ) {
+		return;
+	}
+	$term = get_term_by( 'slug', 'tablichki-obemnye-bukvy', 'product_cat' );
+	$link = $term ? get_term_link( $term ) : '';
+	wp_safe_redirect( $link && ! is_wp_error( $link ) ? $link : home_url( '/katalog/' ), 301 );
+	exit;
+}, 5 );
