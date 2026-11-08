@@ -493,3 +493,21 @@ add_action( 'template_redirect', function () {
 		}
 	}
 }, 5 );
+
+/** v6: заголовок каталога без слова «цены». */
+add_action( 'init', function () {
+	if ( (int) get_option( 'exprinto_catalog_version' ) >= 6 || ! function_exists( 'wc_get_page_id' ) ) {
+		return;
+	}
+	$shop_id = wc_get_page_id( 'shop' );
+	if ( $shop_id > 0 ) {
+		update_post_meta( $shop_id, '_ex_title', 'Каталог адресных табличек и номерных знаков на заказ — любой размер, доставка по Беларуси | Promark.by' );
+	}
+	foreach ( get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false ) ) as $t ) {
+		$title = (string) get_term_meta( $t->term_id, 'ex_title', true );
+		if ( preg_match( '/цен[аы]/ui', $title ) ) {
+			update_term_meta( $t->term_id, 'ex_title', preg_replace( '/\s*—\s*цен[аы][^|]*/ui', ' — на заказ', $title ) );
+		}
+	}
+	update_option( 'exprinto_catalog_version', 6 );
+}, 26 );
