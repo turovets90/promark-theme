@@ -262,3 +262,146 @@ add_action(
 	},
 	1
 );
+
+/* -------------------------------------------------------------------------
+ * Заявка на расчёт стоимости (страница товара и конструктор)
+ * ---------------------------------------------------------------------- */
+
+/** Контактные поля и кнопка — внутри формы с параметрами таблички. */
+function exprinto_quote_fields( $product_id, $context ) {
+	global $wp;
+	$page = $wp && isset( $wp->request ) ? home_url( user_trailingslashit( $wp->request ) ) : home_url( '/' );
+	?>
+	<div class="quote" data-quote>
+		<input type="hidden" name="action" value="exprinto_quote">
+		<input type="hidden" name="product_id" value="<?php echo (int) $product_id; ?>" data-builder-id>
+		<input type="hidden" name="context" value="<?php echo esc_attr( $context ); ?>">
+		<input type="hidden" name="page" value="<?php echo esc_url( $page ); ?>">
+		<?php wp_nonce_field( 'exprinto_quote', 'exprinto_quote_nonce', false ); ?>
+		<div class="hp" aria-hidden="true"><label>Сайт <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+		<div class="quote__note">
+			<?php echo exprinto_icon( 'ruler', 20 ); // phpcs:ignore ?>
+			<p><b>Размер — любой, цену назовём после расчёта.</b> Стоимость зависит от размера, формы и технологии: оставьте телефон — перезвоним в течение 15 минут в рабочее время.</p>
+		</div>
+
+		<div class="quote__grid">
+			<label class="field"><span>Желаемый размер, мм</span><input type="text" name="size" maxlength="40" placeholder="Например: 600 × 300 или «подскажите»"></label>
+			<label class="field field--s"><span>Количество</span><input type="number" name="qty" min="1" max="10000" value="1" inputmode="numeric"></label>
+			<label class="field"><span>Имя <b>*</b></span><input type="text" name="name" autocomplete="name" maxlength="60" placeholder="Иван" required></label>
+			<label class="field"><span>Телефон <b>*</b></span><input type="tel" name="phone" autocomplete="tel" maxlength="25" placeholder="+375 (29) 123-45-67" required></label>
+			<label class="field field--wide"><span>E-mail (необязательно — пришлём макет)</span><input type="email" name="email" autocomplete="email" maxlength="80" placeholder="you@mail.by"></label>
+			<label class="field field--wide"><span>Комментарий</span><textarea name="comment" rows="2" maxlength="600" placeholder="Тип стены, город доставки, пожелания к макету"></textarea></label>
+		</div>
+		<label class="check"><input type="checkbox" name="agree" value="1" required> <span>Согласен на обработку персональных данных согласно <a href="<?php echo esc_url( get_privacy_policy_url() ? get_privacy_policy_url() : home_url( '/politika-konfidencialnosti/' ) ); ?>" target="_blank">политике конфиденциальности</a></span></label>
+		<p class="custom-form__error" role="alert" data-quote-error hidden></p>
+		<button type="submit" class="btn btn--accent btn--lg quote__submit">Рассчитать стоимость <?php echo exprinto_icon( 'arrow', 18 ); // phpcs:ignore ?></button>
+		<p class="quote__hint"><?php echo exprinto_icon( 'shield', 16 ); // phpcs:ignore ?> Ни к чему не обязывает. Оплата — только после согласования цены и макета.</p>
+	</div>
+	<div class="quote-done" data-quote-done hidden>
+		<span class="custom-done__icon"><?php echo exprinto_icon( 'check', 34 ); // phpcs:ignore ?></span>
+		<p class="quote-done__title">Заявка отправлена</p>
+		<p data-quote-done-text>Перезвоним в течение 15 минут в рабочее время, назовём цену и пришлём макет.</p>
+	</div>
+	<?php
+}
+
+function exprinto_handle_quote() {
+	$ajax = wp_doing_ajax();
+	$fail = function ( $msg ) use ( $ajax ) {
+		if ( $ajax ) {
+			wp_send_json_error( array( 'message' => $msg ), 400 );
+		}
+		wp_die( esc_html( $msg ), 'Ошибка', array( 'back_link' => true ) );
+	};
+	if ( ! isset( $_POST['exprinto_quote_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['exprinto_quote_nonce'] ), 'exprinto_quote' ) ) {
+		$fail( 'Сессия устарела. Обновите страницу и отправьте заявку ещё раз.' );
+	}
+	if ( ! empty( $_POST['website'] ) ) { // ловушка для ботов.
+		$ajax ? wp_send_json_success() : exit;
+	}
+	$get = function ( $k ) {
+		return isset( $_POST[ $k ] ) ? trim( sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) ) : '';
+	};
+	$name  = $get( 'name' );
+	$phone = $get( 'phone' );
+	$email = sanitize_email( $get( 'email' ) );
+	if ( '' === $name || strlen( preg_replace( '/\D/', '', $phone ) ) < 7 ) {
+		$fail( 'Укажите имя и телефон — без них мы не сможем назвать цену.' );
+	}
+
+	$pid     = absint( $_POST['product_id'] ?? 0 );
+	$product = $pid && function_exists( 'wc_get_product' ) ? wc_get_product( $pid ) : null;
+	$plate   = $product && function_exists( 'exprinto_product_plate' ) ? exprinto_product_plate( $product ) : null;
+
+	$lines = array(
+		'Имя'     => $name,
+		'Телефон' => $phone,
+		'E-mail'  => $email,
+		'Модель'  => $product ? $product->get_name() : '',
+	);
+	if ( $plate ) {
+		$labels = exprinto_plate_labels( $pid );
+		$finish = sanitize_key( $get( 'ex_finish' ) );
+		$finish = isset( exprinto_finishes()[ $finish ] ) ? $finish : $plate['finish'];
+		$vals   = array(
+			'type'   => $get( 'ex_type' ),
+			'street' => $get( 'ex_street' ),
+			'number' => $get( 'ex_number' ),
+			'finish' => $finish,
+			'base'   => isset( exprinto_bases()[ $get( 'ex_base' ) ] ) ? $get( 'ex_base' ) : $plate['base'],
+		);
+		if ( 'mirror' === $finish ) {
+			$vals['metal'] = isset( exprinto_metals()[ $get( 'ex_metal' ) ] ) ? $get( 'ex_metal' ) : $plate['metal'];
+		} else {
+			$vals['text'] = isset( exprinto_text_colors()[ $get( 'ex_text' ) ] ) ? $get( 'ex_text' ) : $plate['text'];
+		}
+		foreach ( $vals as $k => $v ) {
+			if ( '' !== $v && isset( $labels[ $k ] ) ) {
+				$lines[ $labels[ $k ] ] = exprinto_plate_value( $k, $v );
+			}
+		}
+	}
+	$lines['Желаемый размер'] = $get( 'size' ) ? $get( 'size' ) : 'не указан — подобрать';
+	$lines['Количество']      = max( 1, absint( $_POST['qty'] ?? 1 ) );
+	$lines['Комментарий']     = sanitize_textarea_field( wp_unslash( $_POST['comment'] ?? '' ) );
+	$lines['Источник']        = $get( 'context' );
+	$lines['Страница']        = esc_url_raw( wp_unslash( $_POST['page'] ?? '' ) );
+
+	$body = '';
+	foreach ( $lines as $label => $val ) {
+		if ( '' !== trim( (string) $val ) ) {
+			$body .= $label . ': ' . $val . "\n";
+		}
+	}
+	$lead_id = wp_insert_post( array(
+		'post_type'    => 'ex_lead',
+		'post_status'  => 'private',
+		'post_title'   => 'Расчёт: ' . $name . ' — ' . $phone,
+		'post_content' => $body,
+	) );
+	$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+	if ( $email ) {
+		$headers[] = 'Reply-To: ' . $name . ' <' . $email . '>';
+	}
+	wp_mail( exprinto_notify_emails(), 'Заявка на расчёт таблички — ' . $phone . ( $lead_id ? ' (№' . $lead_id . ')' : '' ), $body, $headers );
+	if ( $email ) {
+		wp_mail(
+			$email,
+			'Мы получили вашу заявку — ' . get_bloginfo( 'name' ),
+			"Здравствуйте, {$name}!\n\nСпасибо за заявку. Мы посчитаем стоимость таблички и перезвоним по телефону {$phone} в течение 15 минут в рабочее время.\n\nВаша заявка:\n\n{$body}\n— " . get_bloginfo( 'name' ) . ', ' . home_url( '/' ),
+			array( 'Content-Type: text/plain; charset=UTF-8' )
+		);
+	}
+	$msg = 'Заявка' . ( $lead_id ? ' №' . $lead_id : '' ) . ' принята. Перезвоним в течение 15 минут в рабочее время, назовём цену и пришлём макет.';
+	if ( $ajax ) {
+		wp_send_json_success( array( 'message' => $msg ) );
+	}
+	$back = esc_url_raw( wp_unslash( $_POST['page'] ?? '' ) );
+	wp_safe_redirect( add_query_arg( 'lead', 'ok', $back ? $back : home_url( '/' ) ) );
+	exit;
+}
+add_action( 'wp_ajax_exprinto_quote', 'exprinto_handle_quote' );
+add_action( 'wp_ajax_nopriv_exprinto_quote', 'exprinto_handle_quote' );
+add_action( 'admin_post_exprinto_quote', 'exprinto_handle_quote' );
+add_action( 'admin_post_nopriv_exprinto_quote', 'exprinto_handle_quote' );

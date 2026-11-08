@@ -31,7 +31,6 @@ foreach ( $products as $p ) {
 		'id'       => $p->get_id(),
 		'name'     => $p->get_name(),
 		'style'    => get_post_meta( $p->get_id(), '_ex_style', true ),
-		'price'    => (float) $p->get_price(),
 		'material' => $p->get_attribute( 'pa_material' ),
 		'url'      => $p->get_permalink(),
 		'labels'   => array(
@@ -63,16 +62,15 @@ $first  = $formats[0];
 		<header class="section__head">
 			<?php echo exprinto_eyebrow( 'онлайн-конструктор' ); // phpcs:ignore ?>
 			<h2 id="constructor-title">Соберите табличку за&nbsp;1&nbsp;минуту — и&nbsp;сразу увидите результат</h2>
-			<p class="section__lead">Выберите форму, впишите адрес, решите — объёмные буквы или печать, и подберите цвет основы и надписей. Цена фиксированная — макет, крепёж и упаковка уже включены.</p>
+			<p class="section__lead">Выберите форму, впишите адрес, решите — объёмные буквы или печать, и подберите цвет основы и надписей. Размер — любой под ваш фасад, а цену назовём после расчёта: макет, крепёж и упаковка уже входят в стоимость.</p>
 		</header>
 
-		<form class="builder" method="post" action="<?php echo esc_url( $first['url'] ); ?>" data-builder data-formats="<?php echo esc_attr( wp_json_encode( $formats ) ); ?>">
+		<form class="builder" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-builder data-quote-form novalidate data-formats="<?php echo esc_attr( wp_json_encode( $formats ) ); ?>">
 			<div class="builder__stage">
 				<div class="wall">
 					<div class="plate-preview" data-plate-preview aria-live="polite"></div>
 				</div>
 				<div class="builder__meta">
-					<span data-builder-size><?php echo esc_html( $first['w'] . '×' . $first['h'] . ' мм' ); ?></span>
 					<span data-builder-material><?php echo esc_html( $first['material'] ); ?></span>
 					<a data-builder-link href="<?php echo esc_url( $first['url'] ); ?>">Подробнее о модели →</a>
 				</div>
@@ -84,13 +82,11 @@ $first  = $formats[0];
 					<legend class="screen-reader-text">Модель</legend>
 					<div class="formats__list">
 						<?php foreach ( $formats as $i => $f ) : ?>
-							<?php $min = min( array_filter( $f['prices'], 'is_numeric' ) ?: array( $f['price'] ) ); ?>
 							<label class="format">
 								<input type="radio" name="ex_format" value="<?php echo (int) $i; ?>" <?php checked( 0, $i ); ?>>
 								<span class="format__body">
 									<span class="format__thumb" data-format-thumb="<?php echo (int) $i; ?>"></span>
-									<span class="format__name"><?php echo esc_html( $f['style'] ? $f['style'] : '' ); ?> <?php echo esc_html( $f['w'] . '×' . $f['h'] ); ?></span>
-									<span class="format__price">от <?php echo esc_html( number_format( $min, 2, ',', ' ' ) ); ?> руб.</span>
+									<span class="format__name"><?php echo esc_html( $f['style'] ? $f['style'] : $f['name'] ); ?></span>
 								</span>
 							</label>
 						<?php endforeach; ?>
@@ -100,17 +96,8 @@ $first  = $formats[0];
 				<div class="builder__step"><b>2</b> Адрес и цвет</div>
 				<?php exprinto_plate_fields( $first, array( 'street' => '' === $first['defaults']['street'] && in_array( $first['layout'], array( 'house', 'vertical' ), true ) ? '' : 'Солнечная', 'number' => '14' ) ); ?>
 
-				<input type="hidden" name="add-to-cart" value="<?php echo (int) $first['id']; ?>" data-builder-id>
-				<input type="hidden" name="quantity" value="1">
-
-				<div class="builder__total">
-					<div>
-						<span class="builder__total-label">Итого с крепежом</span>
-						<strong class="builder__total-price" data-builder-price><?php echo esc_html( number_format( $first['price'], 2, ',', ' ' ) ); ?> руб.</strong>
-					</div>
-					<button type="submit" class="btn btn--accent btn--lg">Заказать табличку <?php echo exprinto_icon( 'arrow', 18 ); // phpcs:ignore ?></button>
-				</div>
-				<p class="builder__hint"><?php echo exprinto_icon( 'shield', 16 ); // phpcs:ignore ?> Оплата при получении. Перед изготовлением пришлём макет на согласование.</p>
+				<div class="builder__step"><b>3</b> Контакты для расчёта</div>
+				<?php exprinto_quote_fields( $first['id'], 'Конструктор на главной' ); ?>
 			</div>
 		</form>
 	</div>

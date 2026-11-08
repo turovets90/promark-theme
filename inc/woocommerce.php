@@ -84,7 +84,6 @@ function exprinto_product_plate( $product ) {
 		'text'   => $meta( 'text', $split[1] ),
 		'metal'  => $meta( 'metal', 'silver' ),
 		'font'   => (string) $meta( 'font' ),
-		'prices' => exprinto_finish_prices( $id, $finish ),
 	);
 }
 
@@ -105,26 +104,6 @@ function exprinto_scheme_split( $scheme ) {
 		'ivory-black'    => array( 'ivory', 'black' ),
 	);
 	return $map[ $scheme ] ?? array( 'white', 'black' );
-}
-
-/** Цены товара для объёмных букв и печати (null — технология недоступна). */
-function exprinto_finish_prices( $product_id, $default_finish = null ) {
-	$product = wc_get_product( $product_id );
-	$own     = $product ? (float) $product->get_regular_price() : 0;
-	if ( null === $default_finish ) {
-		$default_finish = 'mirror' === get_post_meta( $product_id, '_ex_finish', true ) ? 'mirror' : 'print';
-	}
-	$prices = array();
-	foreach ( array( 'mirror', 'print' ) as $f ) {
-		$v           = get_post_meta( $product_id, '_ex_price_' . $f, true );
-		$prices[ $f ] = '' !== $v && null !== $v ? (float) $v : ( $f === $default_finish ? $own : null );
-	}
-	return $prices;
-}
-
-function exprinto_finish_price( $product_id, $finish ) {
-	$prices = exprinto_finish_prices( $product_id );
-	return $prices[ $finish ] ?? null;
 }
 
 /** Макеты для админки. */
@@ -151,8 +130,8 @@ add_action(
 	function () {
 		echo '<div class="options_group"><p class="form-field"><strong style="padding-left:12px">Табличка (онлайн-превью и персонализация)</strong></p>';
 		woocommerce_wp_select( array( 'id' => '_ex_layout', 'label' => 'Макет', 'options' => exprinto_layout_names() ) );
-		woocommerce_wp_text_input( array( 'id' => '_ex_w', 'label' => 'Ширина, мм', 'type' => 'number' ) );
-		woocommerce_wp_text_input( array( 'id' => '_ex_h', 'label' => 'Высота, мм', 'type' => 'number' ) );
+		woocommerce_wp_text_input( array( 'id' => '_ex_w', 'label' => 'Пропорции превью: ширина', 'type' => 'number', 'desc_tip' => true, 'description' => 'Только для формы превью, покупателю не показывается.' ) );
+		woocommerce_wp_text_input( array( 'id' => '_ex_h', 'label' => 'Пропорции превью: высота', 'type' => 'number' ) );
 		woocommerce_wp_select( array(
 			'id'      => '_ex_finish',
 			'label'   => 'Технология',
@@ -178,8 +157,6 @@ add_action(
 			$texts[ $k ] = $t[0];
 		}
 		woocommerce_wp_select( array( 'id' => '_ex_text', 'label' => 'Цвет надписей (печать)', 'options' => $texts ) );
-		woocommerce_wp_text_input( array( 'id' => '_ex_price_mirror', 'label' => 'Цена с объёмными буквами, руб.', 'data_type' => 'price', 'desc_tip' => true, 'description' => 'Пусто — вариант недоступен (если основная технология товара другая).' ) );
-		woocommerce_wp_text_input( array( 'id' => '_ex_price_print', 'label' => 'Цена с УФ-печатью, руб.', 'data_type' => 'price', 'desc_tip' => true, 'description' => 'Пусто — вариант недоступен (если основная технология товара другая).' ) );
 		woocommerce_wp_select( array(
 			'id'      => '_ex_font',
 			'label'   => 'Шрифт (для «Герба»)',
@@ -193,7 +170,7 @@ add_action(
 	'woocommerce_admin_process_product_object',
 	function ( $product ) {
 		// phpcs:disable WordPress.Security.NonceVerification -- проверяет WooCommerce.
-		foreach ( array( '_ex_layout', '_ex_w', '_ex_h', '_ex_finish', '_ex_scheme', '_ex_base', '_ex_metal', '_ex_font', '_ex_text', '_ex_price_mirror', '_ex_price_print' ) as $k ) {
+		foreach ( array( '_ex_layout', '_ex_w', '_ex_h', '_ex_finish', '_ex_scheme', '_ex_base', '_ex_metal', '_ex_font', '_ex_text' ) as $k ) {
 			if ( isset( $_POST[ $k ] ) ) {
 				$product->update_meta_data( $k, sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) );
 			}
@@ -255,11 +232,7 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 			</label>
 		</div>
 
-		<?php
-		$prices = $plate['prices'] ?? array();
-		$both   = isset( $prices['mirror'], $prices['print'] ) && null !== $prices['mirror'] && null !== $prices['print'];
-		?>
-		<fieldset class="finish-toggle" data-finish-toggle <?php echo $both ? '' : 'hidden'; ?>>
+		<fieldset class="finish-toggle" data-finish-toggle>
 			<legend>Надписи</legend>
 			<div class="finish-toggle__list">
 				<?php foreach ( exprinto_finishes() as $fk => $fname ) : ?>
@@ -268,7 +241,6 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 						<span>
 							<b><?php echo 'mirror' === $fk ? 'Объёмные буквы' : 'Печать'; ?></b>
 							<small><?php echo 'mirror' === $fk ? 'зеркальный или цветной акрил' : 'плоская УФ-печать'; ?></small>
-							<em data-finish-price="<?php echo esc_attr( $fk ); ?>"><?php echo isset( $prices[ $fk ] ) && null !== $prices[ $fk ] ? esc_html( number_format( $prices[ $fk ], 2, ',', ' ' ) . ' руб.' ) : ''; ?></em>
 						</span>
 					</label>
 				<?php endforeach; ?>
@@ -316,91 +288,45 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 	<?php
 }
 
-/** Превью над кнопкой «В корзину». */
+// Цен нет: вместо «В корзину» — заявка на расчёт стоимости.
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
+add_filter( 'woocommerce_get_price_html', '__return_empty_string', 99 );
+add_filter( 'woocommerce_is_purchasable', '__return_false' );
+
+/** Форма заявки на странице товара: превью, адрес, цвета, контакты. */
 add_action(
-	'woocommerce_before_add_to_cart_button',
+	'woocommerce_single_product_summary',
 	function () {
 		global $product;
 		$plate = exprinto_product_plate( $product );
-		if ( ! $plate ) {
-			return;
+		echo '<form class="cart quote-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" data-quote-form novalidate>';
+		if ( $plate ) {
+			echo '<div class="configurator" data-plate-config="' . esc_attr( wp_json_encode( $plate ) ) . '">';
+			echo '<div class="configurator__stage"><div class="wall wall--sm"><div class="plate-preview" data-plate-preview aria-live="polite"></div></div>';
+			echo '<p class="configurator__note">' . exprinto_icon( 'pen', 16 ) . ' Превью обновляется по мере ввода. Точный макет дизайнер пришлёт на согласование.</p></div>'; // phpcs:ignore
+			exprinto_plate_fields( $plate );
+			echo '</div>';
 		}
-		echo '<div class="configurator" data-plate-config="' . esc_attr( wp_json_encode( $plate ) ) . '">';
-		echo '<div class="configurator__stage"><div class="wall wall--sm"><div class="plate-preview" data-plate-preview aria-live="polite"></div></div>';
-		echo '<p class="configurator__note">' . exprinto_icon( 'pen', 16 ) . ' Превью обновляется по мере ввода. Точный макет дизайнер пришлёт на согласование.</p></div>'; // phpcs:ignore
-		exprinto_plate_fields( $plate );
-		echo '<label class="field"><span>Комментарий к заказу</span><textarea name="ex_comment" rows="2" maxlength="300" placeholder="Например: нужен крепёж для утеплённого фасада"></textarea></label>';
+		exprinto_quote_fields( $product->get_id(), 'Страница товара' );
+		echo '</form>';
+		echo '<div class="custom-cta"><p class="custom-cta__text"><b>Нужна другая форма, текст или свой макет?</b> Изготовим табличку по индивидуальному заказу.</p>';
+		exprinto_custom_order_button( 'Заказать индивидуальную табличку', 'btn btn--ghost btn--lg custom-cta__btn' );
 		echo '</div>';
 	},
-	5
+	30
 );
 
-/** Проверка обязательных полей при добавлении в корзину. */
-add_filter(
-	'woocommerce_add_to_cart_validation',
-	function ( $passed, $product_id ) {
-		$plate = exprinto_product_plate( $product_id );
-		if ( ! $plate ) {
-			return $passed;
+/** Корзина и оформление не используются — ведём в каталог. */
+add_action(
+	'template_redirect',
+	function () {
+		if ( ( function_exists( 'is_cart' ) && is_cart() ) || ( function_exists( 'is_checkout' ) && is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) ) {
+			wp_safe_redirect( wc_get_page_permalink( 'shop' ) );
+			exit;
 		}
-		// phpcs:disable WordPress.Security.NonceVerification
-		$number = isset( $_REQUEST['ex_number'] ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['ex_number'] ) ) ) : '';
-		$street = isset( $_REQUEST['ex_street'] ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['ex_street'] ) ) ) : '';
-		// phpcs:enable
-		$fields = exprinto_layout_fields( $plate['layout'] );
-		if ( '' === $number ) {
-			wc_add_notice( 'Укажите ' . mb_strtolower( $fields['number'][0] ) . ' — без него мы не сможем изготовить табличку.', 'error' );
-			$passed = false;
-		}
-		if ( $fields['street'][1] && '' === $street ) {
-			wc_add_notice( 'Укажите название улицы.', 'error' );
-			$passed = false;
-		}
-		return $passed;
-	},
-	10,
-	2
-);
-
-/** Сохраняем введённые данные в позиции корзины. */
-add_filter(
-	'woocommerce_add_cart_item_data',
-	function ( $data, $product_id ) {
-		$plate = exprinto_product_plate( $product_id );
-		if ( ! $plate ) {
-			return $data;
-		}
-		// phpcs:disable WordPress.Security.NonceVerification
-		$get  = function ( $k ) {
-			return isset( $_REQUEST[ $k ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ $k ] ) ) : '';
-		};
-		$item = array(
-			'type'   => $get( 'ex_type' ),
-			'street' => $get( 'ex_street' ),
-			'number' => $get( 'ex_number' ),
-		);
-		$finish = sanitize_key( $get( 'ex_finish' ) );
-		if ( ! isset( exprinto_finishes()[ $finish ] ) || null === exprinto_finish_price( $product_id, $finish ) ) {
-			$finish = $plate['finish'];
-		}
-		$base           = sanitize_key( $get( 'ex_base' ) );
-		$item['finish'] = $finish;
-		$item['base']   = isset( exprinto_bases()[ $base ] ) ? $base : $plate['base'];
-		if ( 'mirror' === $finish ) {
-			$metal         = sanitize_key( $get( 'ex_metal' ) );
-			$item['metal'] = isset( exprinto_metals()[ $metal ] ) ? $metal : $plate['metal'];
-		} else {
-			$text         = sanitize_key( $get( 'ex_text' ) );
-			$item['text'] = isset( exprinto_text_colors()[ $text ] ) ? $text : $plate['text'];
-		}
-		$item['comment'] = isset( $_REQUEST['ex_comment'] ) ? sanitize_textarea_field( wp_unslash( $_REQUEST['ex_comment'] ) ) : '';
-		// phpcs:enable
-		$data['ex_plate'] = $item;
-		$data['ex_key']   = md5( wp_json_encode( $item ) ); // разные адреса — разные позиции.
-		return $data;
-	},
-	10,
-	2
+	}
 );
 
 function exprinto_plate_labels( $product_id ) {
@@ -439,71 +365,12 @@ function exprinto_plate_value( $k, $v ) {
 	return $v;
 }
 
-/** Показываем данные таблички в корзине и в оформлении заказа. */
-add_filter(
-	'woocommerce_get_item_data',
-	function ( $item_data, $cart_item ) {
-		if ( empty( $cart_item['ex_plate'] ) ) {
-			return $item_data;
-		}
-		$labels = exprinto_plate_labels( $cart_item['product_id'] );
-		foreach ( $cart_item['ex_plate'] as $k => $v ) {
-			if ( '' === $v || ! isset( $labels[ $k ] ) ) {
-				continue;
-			}
-			$item_data[] = array( 'key' => $labels[ $k ], 'value' => exprinto_plate_value( $k, $v ) );
-		}
-		return $item_data;
-	},
-	10,
-	2
-);
-
-/** И в самом заказе (админка, письма). */
-add_action(
-	'woocommerce_checkout_create_order_line_item',
-	function ( $item, $cart_item_key, $values ) {
-		if ( empty( $values['ex_plate'] ) ) {
-			return;
-		}
-		$labels = exprinto_plate_labels( $values['product_id'] );
-		foreach ( $values['ex_plate'] as $k => $v ) {
-			if ( '' !== $v && isset( $labels[ $k ] ) ) {
-				$item->add_meta_data( $labels[ $k ], exprinto_plate_value( $k, $v ) );
-			}
-		}
-	},
-	10,
-	3
-);
-
-/** Мини-превью таблички вместо фото в корзине. */
-add_filter(
-	'woocommerce_cart_item_thumbnail',
-	function ( $thumb, $cart_item ) {
-		if ( empty( $cart_item['ex_plate'] ) ) {
-			return $thumb;
-		}
-		$plate = exprinto_product_plate( $cart_item['product_id'] );
-		if ( ! $plate ) {
-			return $thumb;
-		}
-		$cfg = array_merge( $plate, array_filter( $cart_item['ex_plate'] ) );
-		return '<span class="cart-plate" data-plate-static="' . esc_attr( wp_json_encode( $cfg ) ) . '">' . $thumb . '</span>';
-	},
-	10,
-	2
-);
-
 /** Без страницы товара добавить в корзину нельзя: нужна персонализация. */
 add_filter(
 	'woocommerce_loop_add_to_cart_link',
 	function ( $html, $product ) {
-		if ( ! exprinto_product_plate( $product ) ) {
-			return $html;
-		}
 		return sprintf(
-			'<a href="%s" class="button btn btn--ghost card__cta" aria-label="%s">Заказать %s</a>',
+			'<a href="%s" class="button btn btn--ghost card__cta" aria-label="%s">Рассчитать стоимость %s</a>',
 			esc_url( $product->get_permalink() ),
 			esc_attr( 'Настроить табличку «' . $product->get_name() . '»' ),
 			exprinto_icon( 'arrow', 16 )
@@ -513,14 +380,13 @@ add_filter(
 	2
 );
 
-add_filter( 'woocommerce_product_single_add_to_cart_text', function () { return 'Заказать табличку'; } );
 
-/** Размер и материал под названием в карточке каталога. */
+/** Материал под названием в карточке каталога. */
 add_action(
 	'woocommerce_after_shop_loop_item_title',
 	function () {
 		global $product;
-		$specs = array_filter( array( $product->get_attribute( 'pa_razmer' ), $product->get_attribute( 'pa_material' ) ) );
+		$specs = array_filter( array( $product->get_attribute( 'pa_material' ) ) );
 		if ( $specs ) {
 			echo '<p class="card__specs">' . esc_html( implode( ' · ', $specs ) ) . '</p>';
 		}
@@ -528,7 +394,7 @@ add_action(
 	4
 );
 
-/** Цена «от» и бейдж «Хит». */
+/** Бейдж «Хит». */
 add_action(
 	'woocommerce_before_shop_loop_item_title',
 	function () {
@@ -668,16 +534,6 @@ add_filter(
 );
 add_filter( 'woocommerce_cart_needs_shipping_address', '__return_false' );
 
-/** Кнопка индивидуального заказа под формой товара. */
-add_action(
-	'woocommerce_after_add_to_cart_form',
-	function () {
-		echo '<div class="custom-cta"><p class="custom-cta__text"><b>Нужен другой размер, текст или свой макет?</b> Изготовим табличку по индивидуальному заказу.</p>';
-		exprinto_custom_order_button( 'Заказать индивидуальную табличку', 'btn btn--ghost btn--lg custom-cta__btn' );
-		echo '</div>';
-	}
-);
-
 /** Письма о заказах — на все адреса из «Контакты магазина → E-mail для писем с сайта». */
 foreach ( array( 'new_order', 'cancelled_order', 'failed_order' ) as $exprinto_email_id ) {
 	add_filter(
@@ -689,40 +545,3 @@ foreach ( array( 'new_order', 'cancelled_order', 'failed_order' ) as $exprinto_e
 		}
 	);
 }
-
-/** Цена позиции зависит от выбранной технологии (объёмные буквы / печать). */
-add_action(
-	'woocommerce_before_calculate_totals',
-	function ( $cart ) {
-		if ( is_admin() && ! wp_doing_ajax() ) {
-			return;
-		}
-		foreach ( $cart->get_cart() as $item ) {
-			if ( empty( $item['ex_plate']['finish'] ) ) {
-				continue;
-			}
-			$price = exprinto_finish_price( $item['product_id'], $item['ex_plate']['finish'] );
-			if ( null !== $price && $price > 0 ) {
-				$item['data']->set_price( $price );
-			}
-		}
-	},
-	20
-);
-
-/** На карточке товара показываем обе цены, если доступны обе технологии. */
-add_filter(
-	'woocommerce_get_price_html',
-	function ( $html, $product ) {
-		if ( ! is_product() || $product->get_id() !== get_queried_object_id() ) {
-			return $html;
-		}
-		$plate = exprinto_product_plate( $product );
-		if ( ! $plate || null === $plate['prices']['mirror'] || null === $plate['prices']['print'] ) {
-			return $html;
-		}
-		return '<span data-live-price>' . $html . '</span>';
-	},
-	10,
-	2
-);

@@ -43,14 +43,12 @@ add_filter(
 				return $custom;
 			}
 			if ( function_exists( 'is_product' ) && is_product() ) {
-				$product = wc_get_product( get_queried_object_id() );
-				$price   = $product ? wc_format_decimal( $product->get_price(), 2 ) : '';
-				return get_the_title() . ( $price ? ' — цена ' . str_replace( '.', ',', $price ) . ' руб.' : '' ) . ', доставка по РБ | ' . $brand;
+				return get_the_title() . ' — любой размер, на заказ с доставкой по РБ | ' . $brand;
 			}
 		}
 		if ( function_exists( 'is_shop' ) && is_shop() ) {
 			$custom = get_post_meta( wc_get_page_id( 'shop' ), '_ex_title', true );
-			return $custom ? $custom : 'Каталог адресных табличек и номерных знаков — цены в ' . $city . ' | ' . $brand;
+			return $custom ? $custom : 'Каталог адресных табличек и номерных знаков на заказ — ' . $city . ' и вся Беларусь | ' . $brand;
 		}
 		if ( is_tax() || is_category() || is_tag() ) {
 			$term   = get_queried_object();
@@ -80,7 +78,7 @@ function exprinto_meta_description() {
 	} elseif ( function_exists( 'is_shop' ) && is_shop() ) {
 		$desc = get_post_meta( wc_get_page_id( 'shop' ), '_ex_desc', true );
 		if ( ! $desc ) {
-			$desc = 'Каталог адресных табличек с объёмными буквами из зеркального акрила и УФ-печатью. Цены от 37,75 руб., доставка по всей Беларуси.';
+			$desc = 'Каталог адресных табличек с объёмными буквами из зеркального акрила и УФ-печатью. Любой размер под ваш фасад, расчёт стоимости за 15 минут, доставка по всей Беларуси.';
 		}
 	} elseif ( is_singular() ) {
 		$id   = get_queried_object_id();
@@ -90,7 +88,7 @@ function exprinto_meta_description() {
 			if ( $p ) {
 				$short = wp_strip_all_tags( preg_replace( '/<\/(li|p|h\d)>/i', '. ', $p->get_short_description() ? $p->get_short_description() : $p->get_description() ) );
 				$short = preg_replace( '/\.\s*\./u', '.', $short );
-				$desc  = get_the_title( $id ) . ' за ' . str_replace( '.', ',', wc_format_decimal( $p->get_price(), 2 ) ) . ' руб. ' . $short;
+				$desc  = get_the_title( $id ) . '. Любой размер, цену назовём после расчёта. ' . $short;
 			}
 		}
 		if ( ! $desc ) {
@@ -187,13 +185,6 @@ add_action(
 			printf( '<meta property="og:image:width" content="%d">' . "\n", (int) $img[1] );
 			printf( '<meta property="og:image:height" content="%d">' . "\n", (int) $img[2] );
 		}
-		if ( 'product' === $type ) {
-			$p = wc_get_product( get_queried_object_id() );
-			if ( $p ) {
-				printf( '<meta property="product:price:amount" content="%s">' . "\n", esc_attr( wc_format_decimal( $p->get_price(), 2 ) ) );
-				printf( '<meta property="product:price:currency" content="%s">' . "\n", esc_attr( get_woocommerce_currency() ) );
-			}
-		}
 		echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
 		echo '<meta name="geo.region" content="BY">' . "\n";
 		echo '<meta name="geo.placename" content="' . esc_attr( exprinto_opt( 'city' ) ) . '">' . "\n";
@@ -250,7 +241,6 @@ function exprinto_schema_org() {
 		'image'       => EXPRINTO_URI . '/assets/img/og-default.jpg',
 		'telephone'   => exprinto_opt( 'phone' ),
 		'email'       => exprinto_opt( 'email' ),
-		'priceRange'  => '37–240 BYN',
 		'currenciesAccepted' => 'BYN',
 		'paymentAccepted'    => 'Наличные, банковская карта, ЕРИП, безналичный расчёт',
 		'areaServed'  => array( '@type' => 'Country', 'name' => 'Беларусь' ),
@@ -335,10 +325,6 @@ add_filter(
 		$material        = $product->get_attribute( 'pa_material' );
 		if ( $material ) {
 			$markup['material'] = $material;
-		}
-		$size = $product->get_attribute( 'pa_razmer' );
-		if ( $size ) {
-			$markup['size'] = $size;
 		}
 		if ( ! empty( $markup['offers'][0] ) ) {
 			$markup['offers'][0]['seller']                    = array( '@id' => home_url( '/#organization' ) );

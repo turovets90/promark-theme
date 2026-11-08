@@ -15,13 +15,13 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 		<div class="hero__copy">
 			<?php echo exprinto_eyebrow( 'собственное производство · Беларусь' ); // phpcs:ignore ?>
 			<h1 class="hero__title">Адресные таблички на&nbsp;дом <span>с&nbsp;доставкой по&nbsp;всей Беларуси</span></h1>
-			<p class="hero__lead">Изготовим табличку с&nbsp;вашим адресом за&nbsp;1–3&nbsp;дня: объёмные буквы из&nbsp;зеркального акрила или УФ-печать, которая не&nbsp;выгорает. Основа — алюминиевый композит, крепёж в&nbsp;комплекте. Макет — бесплатно, оплата — при получении.</p>
+			<p class="hero__lead">Изготовим табличку с&nbsp;вашим адресом за&nbsp;1–3&nbsp;дня: объёмные буквы из&nbsp;зеркального акрила или УФ-печать, которая не&nbsp;выгорает. Основа — алюминиевый композит, размер — любой, крепёж в&nbsp;комплекте. Цену назовём после расчёта, макет — бесплатно, оплата — при получении.</p>
 			<div class="hero__actions">
 				<a class="btn btn--accent btn--lg" href="#konstruktor">Собрать свою табличку <?php echo exprinto_icon( 'arrow', 18 ); // phpcs:ignore ?></a>
 				<a class="btn btn--ghost btn--lg" href="<?php echo esc_url( $shop_url ); ?>">Смотреть каталог</a>
 			</div>
 			<ul class="hero__facts">
-				<li><b>от 37,75</b><span>руб. за табличку</span></li>
+				<li><b>Любой</b><span>размер под ваш фасад</span></li>
 				<li><b>1–2 дня</b><span>изготовление</span></li>
 				<li><b>3 года</b><span>гарантия на печать</span></li>
 			</ul>
@@ -132,8 +132,8 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 			<h2 id="steps-title">От заявки до таблички на фасаде — 4 шага</h2>
 		</header>
 		<ol class="steps">
-			<li class="step"><span class="step__n">01</span><h3>Выберите табличку</h3><p>В конструкторе или каталоге: формат, цвет, ваш адрес.</p></li>
-			<li class="step"><span class="step__n">02</span><h3>Согласуйте макет</h3><p>В течение часа пришлём макет в Viber, Telegram или на e-mail.</p></li>
+			<li class="step"><span class="step__n">01</span><h3>Оставьте заявку</h3><p>В конструкторе или каталоге: модель, цвет, ваш адрес и желаемый размер.</p></li>
+			<li class="step"><span class="step__n">02</span><h3>Узнайте цену и согласуйте макет</h3><p>Перезвоним за 15 минут, назовём стоимость и пришлём макет в Viber, Telegram или на e-mail.</p></li>
 			<li class="step"><span class="step__n">03</span><h3>Мы изготовим</h3><p>Печать и резка на своём оборудовании — 1–2 рабочих дня.</p></li>
 			<li class="step"><span class="step__n">04</span><h3>Получите и оплатите</h3><p>Курьером, в Европочте или Белпочте — в любой точке Беларуси.</p></li>
 		</ol>
@@ -145,23 +145,23 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 		<header class="section__head">
 			<?php echo exprinto_eyebrow( 'технологии' ); // phpcs:ignore ?>
 			<h2 id="mat-title">Объёмные буквы или УФ-печать?</h2>
-			<p class="section__lead">Обе технологии рассчитаны на улицу и годы службы. Разница — во внешнем виде и бюджете.</p>
+			<p class="section__lead">Обе технологии рассчитаны на улицу и годы службы. Разница — во внешнем виде и бюджете: точную стоимость посчитаем под ваш размер.</p>
 		</header>
 		<div class="compare">
 			<article class="compare__card">
 				<h3>УФ-печать на композите</h3>
-				<p class="compare__price">от 117,16 руб.</p>
+				<p class="compare__price">Цена — после расчёта</p>
 				<ul class="ticks">
 					<li>Изображение не выгорает и не смывается</li>
 					<li>Прямоугольные и фигурные формы, 12 цветов</li>
 					<li>Изготовление за 1–2 дня</li>
-					<li>Номерной знак из пластика — от 37,75 руб.</li>
+					<li>Любой размер — под ваш фасад, ворота или калитку</li>
 				</ul>
 			</article>
 			<article class="compare__card compare__card--pro">
 				<span class="badge">Выбор для красивого фасада</span>
 				<h3>Объёмные буквы из зеркального акрила</h3>
-				<p class="compare__price">от 156,92 руб.</p>
+				<p class="compare__price">Цена — после расчёта</p>
 				<ul class="ticks">
 					<li>Буквы зеркального серебра или золота с тенью</li>
 					<li>Отражают свет фар — адрес видно ночью</li>

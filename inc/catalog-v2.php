@@ -21,7 +21,7 @@ function exprinto_v2_categories() {
 <p><strong>С объёмными буквами из зеркального акрила</strong> — это табличка-украшение фасада. Буквы и цифры вырезаются лазером из акрила с зеркальным серебряным или золотым покрытием и наклеиваются на основу из алюминиевого композита. Они отбрасывают тень, играют на солнце и хорошо видны в свете фар.</p>
 <p><strong>С УФ-печатью</strong> — практичный и доступный вариант. Изображение печатается прямо на алюминиевом композите или пластике ультрафиолетовыми чернилами, которые не выгорают и не смываются.</p>
 <h3>Форма и размер</h3>
-<p>Прямоугольные таблички «Модерн» подходят к современной архитектуре, фигурные «Волна», «Купол», «Герб» и «Ажур» — к классическим и загородным домам. Для узких простенков и столбов ворот есть вертикальная табличка 220×700 мм.</p>',
+<p>Прямоугольные таблички «Модерн» подходят к современной архитектуре, фигурные «Волна», «Купол», «Герб» и «Ажур» — к классическим и загородным домам. Для узких простенков и столбов ворот есть вертикальная табличка. Размер любой табличке подберём под ваш фасад.</p>',
 		),
 		'tablichki-obemnye-bukvy' => array(
 			'name'   => 'С объёмными буквами из акрила',
@@ -50,14 +50,18 @@ function exprinto_v2_categories() {
 			'image'  => 'v2-house-black-1.jpg',
 			'desc'   => 'Таблички с номером дома для фасада, ворот и калитки.',
 			'title'  => 'Номерные знаки и таблички с номером дома — купить в Беларуси | Promark.by',
-			'meta'   => 'Таблички с номером дома 250×250 мм. Для фасада, ворот и калитки. УФ-печать, изготовление 1–2 дня, доставка по Беларуси.',
+			'meta'   => 'Таблички с номером дома любого размера для фасада, ворот и калитки. УФ-печать, изготовление 1–2 дня, доставка по Беларуси.',
 			'seo'    => '<h2>Номер дома, который видно издалека</h2><p>Отдельный номерной знак удобно повесить на ворота или калитку, если основная адресная табличка висит на фасаде. Крупные цифры с засечками читаются с 20–25 метров.</p>',
 		),
 	);
 }
 
 function exprinto_v2_products() {
-	$acryl_tail = '
+	$size_price = '
+<h3>Размер и цена</h3>
+<p>Размер таблички может быть любым — сделаем под ваш фасад, ворота или столб. Цена зависит от размера, формы и технологии, поэтому мы озвучим её после просчёта заказа: оставьте заявку на этой странице, и мы перезвоним в течение 15 минут в рабочее время.</p>';
+
+	$acryl_tail = $size_price . '
 <h3>Почему объёмные буквы из акрила</h3>
 <ul>
 <li><strong>Эффектно днём и ночью.</strong> Зеркальная поверхность отражает солнце, фонари и свет фар — адрес видно даже в темноте.</li>
@@ -73,9 +77,9 @@ function exprinto_v2_products() {
 <li>Бесплатный макет на согласование</li>
 </ul>
 <h3>Как заказать</h3>
-<p>Впишите название улицы и номер дома, выберите цвета — превью обновится сразу. После заказа дизайнер пришлёт макет в Viber, Telegram или на e-mail. Изготовим за 2–3 рабочих дня и отправим в любой город Беларуси.</p>';
+<p>Впишите название улицы и номер дома, выберите цвета — превью обновится сразу. Оставьте телефон и нажмите «Рассчитать стоимость»: мы перезвоним, назовём цену и пришлём макет в Viber, Telegram или на e-mail. После согласования изготовим табличку за 2–3 рабочих дня и отправим в любой город Беларуси.</p>';
 
-	$print_tail = '
+	$print_tail = $size_price . '
 <h3>Почему УФ-печать на композите</h3>
 <ul>
 <li><strong>Не выгорает.</strong> УФ-чернила застывают прямо на поверхности и не боятся солнца, дождя и мороза.</li>
@@ -89,113 +93,93 @@ function exprinto_v2_products() {
 <li>Бесплатный макет на согласование</li>
 </ul>
 <h3>Как заказать</h3>
-<p>Введите адрес, выберите цвет и оформите заказ. Изготовим за 1–2 рабочих дня и отправим Европочтой, Белпочтой или курьером. Оплата при получении.</p>';
+<p>Введите адрес, выберите цвет и оставьте заявку на расчёт. Мы перезвоним и назовём цену, а после согласования макета изготовим табличку за 1–2 рабочих дня и отправим Европочтой, Белпочтой или курьером. Оплата при получении.</p>';
 
-	$acryl_short = function ( $size, $base ) {
-		return '<ul><li>Объёмные буквы из акрила с зеркальным серебром (или золотом)</li><li>Основа — алюминиевый композит, ' . $base . '</li><li>Размер ' . $size . ' мм, крепёж в комплекте</li></ul>';
+	$acryl_short = function ( $base ) {
+		return '<ul><li>Объёмные буквы из акрила с зеркальным серебром (или золотом)</li><li>Основа — алюминиевый композит, ' . $base . '</li><li>Любой размер под ваш фасад, крепёж в комплекте</li><li>Цену назовём после просчёта заказа</li></ul>';
 	};
-	$print_short = function ( $size, $mat ) {
-		return '<ul><li>УФ-печать — не выгорает на солнце</li><li>' . $mat . '</li><li>Размер ' . $size . ' мм, отверстия и крепёж в комплекте</li></ul>';
+	$print_short = function ( $mat ) {
+		return '<ul><li>УФ-печать — не выгорает на солнце</li><li>' . $mat . '</li><li>Любой размер, отверстия и крепёж в комплекте</li><li>Цену назовём после просчёта заказа</li></ul>';
 	};
 
 	return array(
 		array(
-			'slug' => 'adresnaya-tablichka-obemnye-bukvy-900x270-grafit', 'style' => '«Модерн»',
-			'name' => 'Адресная табличка 900×270 мм с объёмными буквами из зеркального акрила, графит',
+			'slug' => 'adresnaya-tablichka-modern-obemnye-bukvy-grafit', 'old_slug' => 'adresnaya-tablichka-obemnye-bukvy-900x270-grafit', 'style' => '«Модерн»',
+			'name' => 'Адресная табличка «Модерн» с объёмными буквами из зеркального акрила, графит',
 			'price' => '238.34', 'cats' => array( 'tablichki-obemnye-bukvy' ), 'featured' => true,
 			'cfg' => array( 'layout' => 'line', 'w' => 900, 'h' => 270, 'finish' => 'mirror', 'base' => 'graphite', 'metal' => 'silver' ),
 			'material' => 'Алюминиевый композит + зеркальный акрил', 'size' => '900×270 мм', 'img' => 'v2-modern-acryl-900x270',
-			'short' => $acryl_short( '900×270', 'графитовый цвет' ),
+			'short' => $acryl_short( 'графитовый цвет' ),
 			'desc' => '<p>Большая адресная табличка в современном стиле: «улица» в плашке, название под тонкой линией и крупный номер справа. Все надписи — объёмные, из акрила с зеркальным серебром, на основе из алюминиевого композита графитового цвета. Такая табличка становится акцентом фасада и хорошо видна с дороги.</p>' . $acryl_tail,
 			'ozon' => 'https://ozon.by/t/1fCddp3',
 		),
 		array(
-			'slug' => 'adresnaya-tablichka-obemnye-bukvy-630x360-sinyaya', 'style' => '«Волна»',
-			'name' => 'Адресная табличка «Волна» 630×360 мм с объёмными буквами из зеркального акрила, синяя',
-			'price' => '223.36', 'cats' => array( 'tablichki-obemnye-bukvy' ), 'featured' => true,
-			'cfg' => array( 'layout' => 'wave', 'w' => 630, 'h' => 360, 'finish' => 'mirror', 'base' => 'blue', 'metal' => 'silver' ),
-			'material' => 'Алюминиевый композит + зеркальный акрил', 'size' => '630×360 мм', 'img' => 'v2-wave-blue',
-			'short' => $acryl_short( '630×360', 'синий цвет' ),
-			'desc' => '<p>Фигурная табличка с плавной «волной» и щитом для номера дома. Название улицы набрано каллиграфическим шрифтом, по контуру — тонкая зеркальная рамка. Яркий синий цвет основы и зеркальное серебро делают табличку заметной на любом фасаде и заборе.</p>' . $acryl_tail,
-			'ozon' => 'https://ozon.by/t/1fClfQs',
-		),
-		array(
-			'slug' => 'adresnaya-tablichka-obemnye-bukvy-620x380-korichnevaya', 'style' => '«Купол»',
-			'name' => 'Адресная табличка «Купол» 620×380 мм с объёмными буквами из зеркального акрила, коричневая',
+			'slug' => 'adresnaya-tablichka-kupol-obemnye-bukvy-korichnevaya', 'old_slug' => 'adresnaya-tablichka-obemnye-bukvy-620x380-korichnevaya', 'style' => '«Купол»',
+			'name' => 'Адресная табличка «Купол» с объёмными буквами из зеркального акрила, коричневая',
 			'price' => '218.50', 'cats' => array( 'tablichki-obemnye-bukvy' ), 'featured' => true,
 			'cfg' => array( 'layout' => 'arch', 'w' => 620, 'h' => 380, 'finish' => 'mirror', 'base' => 'brown', 'metal' => 'silver' ),
 			'material' => 'Алюминиевый композит + зеркальный акрил', 'size' => '620×380 мм', 'img' => 'v2-arch-brown',
-			'short' => $acryl_short( '620×380', 'коричневый цвет' ),
+			'short' => $acryl_short( 'коричневый цвет' ),
 			'desc' => '<p>Классическая табличка с куполом: номер дома в верхней арке, название улицы — крупно в центральной полосе, «улица» — в нижнем выступе. Шрифт с засечками и зеркальная рамка по контуру придают табличке солидный, «усадебный» вид. Идеальна для домов из кирпича, дерева и с отделкой под камень.</p>' . $acryl_tail,
 			'ozon' => 'https://ozon.by/t/AxdWAgz',
 		),
 		array(
-			'slug' => 'adresnaya-tablichka-obemnye-bukvy-630x360-korichnevaya', 'style' => '«Волна»',
-			'name' => 'Адресная табличка «Волна» 630×360 мм с объёмными буквами из зеркального акрила, коричневая',
-			'price' => '195.04', 'cats' => array( 'tablichki-obemnye-bukvy' ), 'featured' => false,
-			'cfg' => array( 'layout' => 'wave', 'w' => 630, 'h' => 360, 'finish' => 'mirror', 'base' => 'brown', 'metal' => 'silver' ),
-			'material' => 'Алюминиевый композит + зеркальный акрил', 'size' => '630×360 мм', 'img' => 'v2-wave-brown',
-			'short' => $acryl_short( '630×360', 'коричневый цвет' ),
-			'desc' => '<p>«Волна» в тёплом коричневом цвете — для деревянных домов, фасадов с клинкером и коричневой кровлей. Каллиграфическое название улицы, номер в фигурном щите и зеркальная рамка по контуру. Буквы можно заказать в зеркальном серебре или золоте.</p>' . $acryl_tail,
-			'ozon' => 'https://ozon.by/t/cFjWTgJ',
-		),
-		array(
-			'slug' => 'adresnaya-tablichka-obemnye-bukvy-590x330-korichnevaya', 'style' => '«Герб»',
-			'name' => 'Адресная табличка «Герб» 590×330 мм с объёмными буквами из зеркального акрила, коричневая',
+			'slug' => 'adresnaya-tablichka-gerb-obemnye-bukvy-korichnevaya', 'old_slug' => 'adresnaya-tablichka-obemnye-bukvy-590x330-korichnevaya', 'style' => '«Герб»',
+			'name' => 'Адресная табличка «Герб» с объёмными буквами из зеркального акрила, коричневая',
 			'price' => '194.70', 'cats' => array( 'tablichki-obemnye-bukvy' ), 'featured' => false,
 			'cfg' => array( 'layout' => 'crest', 'w' => 590, 'h' => 330, 'finish' => 'mirror', 'base' => 'brown', 'metal' => 'silver' ),
 			'material' => 'Алюминиевый композит + зеркальный акрил', 'size' => '590×330 мм', 'img' => 'v2-crest-brown',
-			'short' => $acryl_short( '590×330', 'коричневый цвет' ),
+			'short' => $acryl_short( 'коричневый цвет' ),
 			'desc' => '<p>Табличка в форме герба: «улица» в верхней вкладке, название — в центральной полосе с фигурными концами, номер дома — в нижнем медальоне. Симметричная композиция и зеркальная рамка смотрятся нарядно и торжественно.</p>' . $acryl_tail,
 			'ozon' => 'https://ozon.by/t/j7qKGUX',
 		),
 		array(
-			'slug' => 'adresnaya-tablichka-obemnye-bukvy-220x700-vertikalnaya', 'style' => '«Вертикаль»',
-			'name' => 'Вертикальная табличка с номером дома 220×700 мм, объёмные цифры из зеркального акрила, графит',
+			'slug' => 'vertikalnaya-tablichka-nomer-doma-obemnye-cifry-grafit', 'old_slug' => 'adresnaya-tablichka-obemnye-bukvy-220x700-vertikalnaya', 'style' => '«Вертикаль»',
+			'name' => 'Вертикальная табличка с номером дома, объёмные цифры из зеркального акрила, графит',
 			'price' => '156.92', 'cats' => array( 'tablichki-obemnye-bukvy', 'nomera-domov' ), 'featured' => true,
 			'cfg' => array( 'layout' => 'vertical', 'w' => 220, 'h' => 700, 'finish' => 'mirror', 'base' => 'graphite', 'metal' => 'silver' ),
 			'material' => 'Алюминиевый композит + зеркальный акрил', 'size' => '220×700 мм', 'img' => 'v2-vertical-graphite',
-			'short' => $acryl_short( '220×700', 'графитовый цвет' ),
+			'short' => $acryl_short( 'графитовый цвет' ),
 			'desc' => '<p>Узкая вертикальная табличка для столба ворот, простенка у входной двери или колонны. Цифры номера дома расположены одна под другой — крупно и стильно. По желанию добавим внизу название улицы. Крепится на дистанционные держатели, которые «отрывают» табличку от стены.</p>' . $acryl_tail,
 			'ozon' => 'https://ozon.by/t/4KpD3zR',
 		),
 		array(
-			'slug' => 'adresnaya-tablichka-900x270-uf-pechat-belo-seraya', 'style' => '«Модерн»',
-			'name' => 'Адресная табличка «Домовой знак» 900×270 мм, бело-серая, алюминиевый композит, УФ-печать',
+			'slug' => 'adresnaya-tablichka-domovoy-znak-uf-pechat-belo-seraya', 'old_slug' => 'adresnaya-tablichka-900x270-uf-pechat-belo-seraya', 'style' => '«Модерн»',
+			'name' => 'Адресная табличка «Домовой знак», бело-серая, алюминиевый композит, УФ-печать',
 			'price' => '126.46', 'cats' => array( 'tablichki-uf-pechat' ), 'featured' => true,
 			'cfg' => array( 'layout' => 'line', 'w' => 900, 'h' => 270, 'finish' => 'print', 'scheme' => 'white-graphite' ),
 			'material' => 'Алюминиевый композит 3 мм', 'size' => '900×270 мм', 'img' => 'v2-modern-print-900x270',
-			'short' => $print_short( '900×270', 'Алюминиевый композит 3 мм' ),
-			'desc' => '<p>Большая адресная табличка в лаконичном стиле: крупный номер справа, тип улицы в плашке и название под тонкой линией. Номер высотой 21 см читается с 30 метров. Основа — алюминиевый композит, изображение нанесено УФ-печатью.</p>' . $print_tail,
+			'short' => $print_short( 'Алюминиевый композит 3 мм' ),
+			'desc' => '<p>Большая адресная табличка в лаконичном стиле: крупный номер справа, тип улицы в плашке и название под тонкой линией. Крупный номер читается с 30 метров. Основа — алюминиевый композит, изображение нанесено УФ-печатью.</p>' . $print_tail,
 			'ozon' => 'https://ozon.by/t/RhUeIZP',
 		),
 		array(
-			'slug' => 'adresnaya-tablichka-700x290-uf-pechat-sinyaya', 'style' => '«Ажур»',
-			'name' => 'Адресная табличка «Ажур» 700×290 мм, синяя, алюминиевый композит, УФ-печать',
+			'slug' => 'adresnaya-tablichka-azhur-uf-pechat-sinyaya', 'old_slug' => 'adresnaya-tablichka-700x290-uf-pechat-sinyaya', 'style' => '«Ажур»',
+			'name' => 'Адресная табличка «Ажур», синяя, алюминиевый композит, УФ-печать',
 			'price' => '122.34', 'cats' => array( 'tablichki-uf-pechat' ), 'featured' => true,
 			'cfg' => array( 'layout' => 'ornate', 'w' => 700, 'h' => 290, 'finish' => 'print', 'scheme' => 'blue-white' ),
 			'material' => 'Алюминиевый композит 3 мм', 'size' => '700×290 мм', 'img' => 'v2-ornate-blue',
-			'short' => $print_short( '700×290', 'Фигурная резка, алюминиевый композит 3 мм' ),
+			'short' => $print_short( 'Фигурная резка, алюминиевый композит 3 мм' ),
 			'desc' => '<p>Фигурная табличка с завитками по краям — классический городской стиль. «Улица», название и номер дома расположены по центру, по контуру — декоративная рамка. Синий фон и белые буквы — привычная и хорошо читаемая пара.</p>' . $print_tail,
 			'ozon' => 'https://ozon.by/t/9oyrc62',
 		),
 		array(
-			'slug' => 'adresnaya-tablichka-590x330-uf-pechat-zelenaya', 'style' => '«Герб»',
-			'name' => 'Адресная табличка «Герб» 590×330 мм, зелёная, алюминиевый композит, УФ-печать',
+			'slug' => 'adresnaya-tablichka-gerb-uf-pechat-zelenaya', 'old_slug' => 'adresnaya-tablichka-590x330-uf-pechat-zelenaya', 'style' => '«Герб»',
+			'name' => 'Адресная табличка «Герб», зелёная, алюминиевый композит, УФ-печать',
 			'price' => '117.16', 'cats' => array( 'tablichki-uf-pechat' ), 'featured' => false,
 			'cfg' => array( 'layout' => 'crest', 'w' => 590, 'h' => 330, 'finish' => 'print', 'scheme' => 'green-white', 'font' => 'cond' ),
 			'material' => 'Алюминиевый композит 3 мм', 'size' => '590×330 мм', 'img' => 'v2-crest-green',
-			'short' => $print_short( '590×330', 'Фигурная резка, алюминиевый композит 3 мм' ),
+			'short' => $print_short( 'Фигурная резка, алюминиевый композит 3 мм' ),
 			'desc' => '<p>Фигурная табличка «Герб» в благородном зелёном цвете: «улица» в верхней вкладке, название в центральной полосе и номер дома в медальоне. Строгий узкий шрифт хорошо читается издалека.</p>' . $print_tail,
 			'ozon' => 'https://ozon.by/t/pHvXy5e',
 		),
 		array(
-			'slug' => 'tablichka-nomer-doma-250x250-chernaya', 'style' => '«Домовой знак»',
-			'name' => 'Табличка с номером дома «Домовой знак» 250×250 мм, чёрная, пластик, УФ-печать',
+			'slug' => 'tablichka-nomer-doma-domovoy-znak-chernaya', 'old_slug' => 'tablichka-nomer-doma-250x250-chernaya', 'style' => '«Домовой знак»',
+			'name' => 'Табличка с номером дома «Домовой знак», чёрная, пластик, УФ-печать',
 			'price' => '37.75', 'cats' => array( 'nomera-domov' ), 'featured' => true,
 			'cfg' => array( 'layout' => 'house', 'w' => 250, 'h' => 250, 'finish' => 'print', 'scheme' => 'black-white' ),
 			'material' => 'Пластик ПВХ 3 мм', 'size' => '250×250 мм', 'img' => 'v2-house-black',
-			'short' => $print_short( '250×250', 'Пластик ПВХ 3 мм — лёгкий и влагостойкий' ),
+			'short' => $print_short( 'Пластик ПВХ 3 мм — лёгкий и влагостойкий' ),
 			'desc' => '<p>Квадратный номерной знак с крупными цифрами с засечками и декоративной рамкой. Повесьте его на ворота, калитку или второй фасад — номер дома будет виден с улицы. По желанию добавим надпись сверху и название улицы снизу.</p>' . $print_tail,
 			'ozon' => 'https://ozon.by/t/CrTLccL',
 		),
@@ -365,42 +349,6 @@ function exprinto_catalog_v2_install() {
 }
 
 /**
- * v3: две технологии у каждой модели (объёмные буквы / печать), цвет основы и надписей отдельно.
- * Цены: [объёмные буквы, печать]. Где на Ozon есть только один вариант, второй — расчётный (правится в админке товара).
- */
-function exprinto_v3_prices() {
-	return array(
-		'adresnaya-tablichka-obemnye-bukvy-900x270-grafit'       => array( 238.34, 126.46, 'graphite', 'white' ),
-		'adresnaya-tablichka-obemnye-bukvy-630x360-sinyaya'      => array( 223.36, 122.90, 'blue', 'white' ),
-		'adresnaya-tablichka-obemnye-bukvy-620x380-korichnevaya' => array( 218.50, 119.90, 'brown', 'white' ),
-		'adresnaya-tablichka-obemnye-bukvy-630x360-korichnevaya' => array( 195.04, 107.90, 'brown', 'white' ),
-		'adresnaya-tablichka-obemnye-bukvy-590x330-korichnevaya' => array( 194.70, 117.16, 'brown', 'white' ),
-		'adresnaya-tablichka-obemnye-bukvy-220x700-vertikalnaya' => array( 156.92, 86.90, 'graphite', 'white' ),
-		'adresnaya-tablichka-900x270-uf-pechat-belo-seraya'      => array( 238.34, 126.46, 'white', 'graphite' ),
-		'adresnaya-tablichka-700x290-uf-pechat-sinyaya'          => array( 222.90, 122.34, 'blue', 'white' ),
-		'adresnaya-tablichka-590x330-uf-pechat-zelenaya'         => array( 194.70, 117.16, 'green', 'white' ),
-		'tablichka-nomer-doma-250x250-chernaya'                  => array( 79.90, 37.75, 'black', 'white' ),
-	);
-}
-
-function exprinto_catalog_v3_update() {
-	foreach ( exprinto_v3_prices() as $slug => $row ) {
-		$post = get_page_by_path( $slug, OBJECT, 'product' );
-		if ( ! $post ) {
-			continue;
-		}
-		update_post_meta( $post->ID, '_ex_price_mirror', wc_format_decimal( $row[0], 2 ) );
-		update_post_meta( $post->ID, '_ex_price_print', wc_format_decimal( $row[1], 2 ) );
-		update_post_meta( $post->ID, '_ex_base', $row[2] );
-		update_post_meta( $post->ID, '_ex_text', $row[3] );
-	}
-	if ( function_exists( 'wc_delete_product_transients' ) ) {
-		wc_delete_product_transients();
-	}
-	update_option( 'exprinto_catalog_version', 3 );
-}
-
-/**
  * v4: сняты с продажи две модели «Волна» 630×360 (синяя и коричневая).
  * Товары перемещаются в корзину (их можно восстановить в админке: Товары → Корзина),
  * а их адреса навсегда (301) перенаправляются в раздел «С объёмными буквами из акрила».
@@ -428,17 +376,120 @@ add_action( 'init', function () {
 	update_option( 'exprinto_catalog_version', 4 );
 }, 20 );
 
+/**
+ * v5: размеры и цены убраны из товаров. Названия и адреса без размеров,
+ * описание «Размер и цена», цены удалены, характеристика «Размер» и чертежи с размерами — из галерей.
+ */
+add_action( 'init', function () {
+	if ( (int) get_option( 'exprinto_catalog_version' ) >= 5 || ! function_exists( 'wc_get_product' ) ) {
+		return;
+	}
+	@set_time_limit( 120 ); // phpcs:ignore
+	foreach ( exprinto_v2_products() as $p ) {
+		$post = get_page_by_path( $p['old_slug'] ?? $p['slug'], OBJECT, 'product' );
+		if ( ! $post ) {
+			$post = get_page_by_path( $p['slug'], OBJECT, 'product' );
+		}
+		if ( ! $post ) {
+			continue;
+		}
+		$product = wc_get_product( $post->ID );
+		if ( ! $product ) {
+			continue;
+		}
+		$product->set_name( $p['name'] );
+		$product->set_slug( $p['slug'] );
+		$product->set_short_description( $p['short'] );
+		$product->set_description( $p['desc'] );
+		$product->set_regular_price( '' );
+		$product->set_sale_price( '' );
+		$product->set_price( '' );
+
+		// Характеристика «Размер» — убрать.
+		$attrs = $product->get_attributes();
+		unset( $attrs['pa_razmer'] );
+		$product->set_attributes( $attrs );
+
+		// Чертёж с размерами (вторая картинка) — убрать из галереи; подписи картинок — по новому названию.
+		$gallery = array();
+		foreach ( $product->get_gallery_image_ids() as $aid ) {
+			$file = (string) get_post_meta( $aid, '_wp_attached_file', true );
+			if ( preg_match( '/-2(-\d+)?\.(jpe?g|png|webp)$/i', $file ) ) {
+				continue;
+			}
+			$gallery[] = $aid;
+		}
+		$product->set_gallery_image_ids( $gallery );
+		$product->delete_meta_data( '_ex_price_mirror' );
+		$product->delete_meta_data( '_ex_price_print' );
+		$product->save();
+
+		$imgs = array_merge( array( $product->get_image_id() ), $gallery );
+		foreach ( array_values( array_filter( $imgs ) ) as $k => $aid ) {
+			$alt = $p['name'] . ( $k ? ' — варианты цвета' : '' );
+			update_post_meta( $aid, '_wp_attachment_image_alt', $alt );
+			wp_update_post( array( 'ID' => $aid, 'post_title' => $alt ) );
+		}
+	}
+
+	// Атрибут «Размер» больше не нужен.
+	if ( function_exists( 'wc_attribute_taxonomy_id_by_name' ) && function_exists( 'wc_delete_attribute' ) ) {
+		$aid = wc_attribute_taxonomy_id_by_name( 'pa_razmer' );
+		if ( $aid ) {
+			wc_delete_attribute( $aid );
+		}
+	}
+
+	// Тексты категорий.
+	foreach ( exprinto_v2_categories() as $slug => $c ) {
+		$t = get_term_by( 'slug', $slug, 'product_cat' );
+		if ( $t ) {
+			update_term_meta( $t->term_id, 'ex_desc', $c['meta'] );
+			update_term_meta( $t->term_id, 'ex_seo_text', $c['seo'] );
+		}
+	}
+
+	// Цены в текстах страниц.
+	$shop_id = wc_get_page_id( 'shop' );
+	if ( $shop_id > 0 ) {
+		update_post_meta( $shop_id, '_ex_desc', 'Каталог адресных табличек с объёмными буквами из зеркального акрила и УФ-печатью. Любой размер под ваш фасад, расчёт стоимости за 15 минут, доставка по всей Беларуси.' );
+	}
+	$pages = get_posts( array( 'post_type' => 'page', 'post_status' => 'any', 'numberposts' => -1 ) );
+	foreach ( $pages as $pg ) {
+		$c = $pg->post_content;
+		$n = preg_replace( '#<p>Цена зависит от размера[^<]*</p>#u', '<p>Размер таблички может быть любым — сделаем под ваш фасад, ворота или столб. Стоимость зависит от размера, формы и технологии, поэтому точную цену мы назовём после просчёта заказа. В неё уже входят макет, крепёж и упаковка, а при заказе от 100 руб. доставка по Беларуси бесплатная.</p>', $c );
+		if ( $n !== $c ) {
+			wp_update_post( array( 'ID' => $pg->ID, 'post_content' => $n ) );
+		}
+	}
+
+	if ( function_exists( 'wc_delete_product_transients' ) ) {
+		wc_delete_product_transients();
+	}
+	flush_rewrite_rules( false );
+	update_option( 'exprinto_catalog_version', 5 );
+}, 25 );
+
+/** Старые адреса товаров → новые (301). Снятые с продажи — в раздел каталога. */
 add_action( 'template_redirect', function () {
 	if ( ! is_404() ) {
 		return;
 	}
 	$path = trim( (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', PHP_URL_PATH ), '/' ); // phpcs:ignore
-	$slug = basename( $path );
-	if ( ! in_array( $slug, exprinto_removed_products(), true ) && ! in_array( preg_replace( '/__trashed$/', '', $slug ), exprinto_removed_products(), true ) ) {
-		return;
+	$slug = preg_replace( '/__trashed$/', '', basename( $path ) );
+	if ( in_array( $slug, exprinto_removed_products(), true ) ) {
+		$term = get_term_by( 'slug', 'tablichki-obemnye-bukvy', 'product_cat' );
+		$link = $term ? get_term_link( $term ) : '';
+		wp_safe_redirect( $link && ! is_wp_error( $link ) ? $link : home_url( '/katalog/' ), 301 );
+		exit;
 	}
-	$term = get_term_by( 'slug', 'tablichki-obemnye-bukvy', 'product_cat' );
-	$link = $term ? get_term_link( $term ) : '';
-	wp_safe_redirect( $link && ! is_wp_error( $link ) ? $link : home_url( '/katalog/' ), 301 );
-	exit;
+	foreach ( exprinto_v2_products() as $p ) {
+		if ( isset( $p['old_slug'] ) && $p['old_slug'] === $slug ) {
+			$post = get_page_by_path( $p['slug'], OBJECT, 'product' );
+			if ( $post && 'publish' === $post->post_status ) {
+				wp_safe_redirect( get_permalink( $post ), 301 );
+				exit;
+			}
+		}
+	}
 }, 5 );

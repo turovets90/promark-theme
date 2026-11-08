@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 $opts    = exprinto_custom_order_options();
 $product = ( function_exists( 'is_product' ) && is_product() ) ? get_the_title() : '';
-$plate   = ( $product && function_exists( 'exprinto_product_plate' ) ) ? exprinto_product_plate( get_the_ID() ) : null;
 ?>
 <dialog class="modal" id="custom-order" aria-labelledby="custom-order-title">
 	<div class="modal__box">
@@ -38,8 +37,8 @@ $plate   = ( $product && function_exists( 'exprinto_product_plate' ) ) ? exprint
 							<?php endforeach; ?>
 						</select>
 					</label>
-					<label class="field"><span>Ширина, мм</span><input type="number" name="width" min="50" max="3000" step="1" inputmode="numeric" placeholder="<?php echo esc_attr( $plate ? $plate['w'] : '600' ); ?>"></label>
-					<label class="field"><span>Высота, мм</span><input type="number" name="height" min="50" max="3000" step="1" inputmode="numeric" placeholder="<?php echo esc_attr( $plate ? $plate['h'] : '200' ); ?>"></label>
+					<label class="field"><span>Ширина, мм</span><input type="number" name="width" min="50" max="3000" step="1" inputmode="numeric" placeholder="600"></label>
+					<label class="field"><span>Высота, мм</span><input type="number" name="height" min="50" max="3000" step="1" inputmode="numeric" placeholder="200"></label>
 					<label class="field"><span>Материал</span>
 						<select name="material">
 							<?php foreach ( $opts['material'] as $o ) : ?>

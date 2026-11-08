@@ -81,18 +81,10 @@
 		var r = scope.querySelector('[data-plate="' + name + '"][value="' + value + '"]');
 		if (r) { r.checked = true; var fs = r.closest('fieldset'); var out = fs && $('.swatches__name', fs); if (out) { out.textContent = r.getAttribute('data-name'); } }
 	}
-	function money(n) { return Number(n).toFixed(2).replace('.', ',') + ' ' + ((window.exprintoData && exprintoData.currency) || 'руб.'); }
-	/** Переключатель «объёмные / печать»: виден, если у товара есть обе цены. */
-	function setFinishToggle(scope, prices, finish) {
+	/** Переключатель «объёмные / печать». */
+	function setFinishToggle(scope, finish) {
 		var box = $('[data-finish-toggle]', scope);
 		if (!box) { return; }
-		var both = prices && prices.mirror != null && prices.print != null;
-		box.hidden = !both;
-		box.disabled = !both;
-		['mirror', 'print'].forEach(function (k) {
-			var el = box.querySelector('[data-finish-price="' + k + '"]');
-			if (el) { el.textContent = prices && prices[k] != null ? money(prices[k]) : ''; }
-		});
 		var r = box.querySelector('[data-plate="finish"][value="' + finish + '"]');
 		if (r) { r.checked = true; }
 	}
@@ -124,19 +116,13 @@
 			var base = JSON.parse(box.getAttribute('data-plate-config'));
 			var preview = $('[data-plate-preview]', box);
 			var form = box.closest('form') || box;
-			var livePrice = $('[data-live-price]');
 			var update = function () {
 				var f = readFields(form), cfg = Object.assign({}, base);
 				Object.keys(f).forEach(function (k) { if (f[k] !== '' || k === 'type' || k === 'street') { cfg[k] = f[k]; } });
 				draw(preview, cfg);
 			};
 			$$('[data-plate="finish"]', form).forEach(function (r) {
-				r.addEventListener('change', function () {
-					setFinish(form, r.value);
-					if (livePrice && base.prices && base.prices[r.value] != null) {
-						livePrice.innerHTML = '<span class="woocommerce-Price-amount amount"><bdi>' + money(base.prices[r.value]) + '</bdi></span>';
-					}
-				});
+				r.addEventListener('change', function () { setFinish(form, r.value); });
 			});
 			form.addEventListener('input', update);
 			form.addEventListener('change', update);
@@ -160,8 +146,6 @@
 			};
 			var showPrice = function () {
 				var fin = (form.querySelector('[data-plate="finish"]:checked') || {}).value || current.finish;
-				var pr = current.prices && current.prices[fin] != null ? current.prices[fin] : current.price;
-				$('[data-builder-price]', form).textContent = money(pr);
 				var mat = $('[data-builder-material]', form);
 				if (mat) {
 					mat.textContent = fin === current.finish ? (current.material || '') : (fin === 'mirror' ? 'Алюминиевый композит + объёмные буквы из акрила' : 'Алюминиевый композит, УФ-печать');
@@ -187,13 +171,10 @@
 				r.addEventListener('change', function () {
 					var prevLayout = current.layout;
 					current = formats[+r.value];
-					form.action = current.url;
 					$('[data-builder-id]', form).value = current.id;
-
-					$('[data-builder-size]', form).textContent = current.w + '×' + current.h + ' мм';
 					$('[data-builder-material]', form).textContent = current.material || '';
 					var link = $('[data-builder-link]', form); if (link) { link.href = current.url; }
-					setFinishToggle(form, current.prices, current.finish);
+					setFinishToggle(form, current.finish);
 					setFinish(form, current.finish);
 					setRadio(form, 'base', current.base); setRadio(form, 'metal', current.metal); setRadio(form, 'text', current.text);
 					showPrice();
@@ -297,6 +278,44 @@
 				.then(function () { btn.disabled = false; btn.classList.remove('is-loading'); });
 		});
 	}
+
+	/* ---------- Заявка на расчёт стоимости ---------- */
+	$$('[data-quote-form]').forEach(function (form) {
+		var box = $('[data-quote]', form);
+		var done = $('[data-quote-done]', form);
+		var errBox = $('[data-quote-error]', form);
+		if (!box) { return; }
+		form.addEventListener('submit', function (e) {
+			e.preventDefault();
+			errBox.hidden = true;
+			var fv = function (n) { return form.querySelector('[name="' + n + '"]') || {}; };
+			var need = [];
+			var num = fv('ex_number');
+			if (num.required && !(num.value || '').trim()) { need.push('номер дома'); }
+			var st = fv('ex_street');
+			if (st.required && !(st.value || '').trim()) { need.push('название улицы'); }
+			if (!(fv('name').value || '').trim()) { need.push('имя'); }
+			if ((fv('phone').value || '').replace(/\D/g, '').length < 7) { need.push('телефон'); }
+			if (!fv('agree').checked) { need.push('согласие на обработку данных'); }
+			if (need.length) { errBox.textContent = 'Заполните: ' + need.join(', ') + '.'; errBox.hidden = false; return; }
+			var btn = $('.quote__submit', form);
+			btn.disabled = true; btn.classList.add('is-loading');
+			fetch(exprintoData.ajax, { method: 'POST', body: new FormData(form), credentials: 'same-origin' })
+				.then(function (r) { return r.json().catch(function () { return { success: false }; }); })
+				.then(function (res) {
+					if (res && res.success) {
+						if (res.data && res.data.message) { $('[data-quote-done-text]', form).textContent = res.data.message; }
+						box.hidden = true; done.hidden = false;
+						done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					} else {
+						errBox.textContent = (res && res.data && res.data.message) || 'Не удалось отправить. Позвоните нам или напишите в мессенджер.';
+						errBox.hidden = false;
+					}
+				})
+				.catch(function () { errBox.textContent = 'Нет соединения. Попробуйте ещё раз.'; errBox.hidden = false; })
+				.then(function () { btn.disabled = false; btn.classList.remove('is-loading'); });
+		});
+	});
 
 	/* ---------- Количество в корзине (Woo fragments) ---------- */
 	if (window.jQuery) {

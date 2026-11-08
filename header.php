@@ -55,12 +55,6 @@ $phone = exprinto_opt( 'phone' );
 				<span class="header-phone__num"><?php echo esc_html( $phone ); ?></span>
 				<span class="header-phone__hint">Перезвоним за 15 минут</span>
 			</a>
-			<?php if ( function_exists( 'wc_get_cart_url' ) ) : ?>
-				<a class="cart-link" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="Корзина">
-					<?php echo exprinto_icon( 'cart', 24 ); // phpcs:ignore ?>
-					<?php echo exprinto_cart_count_html(); // phpcs:ignore ?>
-				</a>
-			<?php endif; ?>
 			<button class="burger" type="button" aria-controls="site-nav" aria-expanded="false" aria-label="Открыть меню">
 				<span></span><span></span><span></span>
 			</button>

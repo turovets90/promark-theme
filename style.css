@@ -787,3 +787,28 @@ html.modal-open { overflow: hidden; }
 @media print {
 	.topbar, .site-header, .site-footer, .float-call { display: none; }
 }
+
+/* ---------- Заявка на расчёт стоимости (товар и конструктор) ---------- */
+.quote { margin-top: 22px; padding-top: 20px; border-top: 1px dashed var(--line-2); }
+.builder .quote { margin-top: 4px; padding-top: 0; border-top: 0; }
+.quote__note { display: flex; gap: 12px; align-items: flex-start; background: #fff8e1; border: 1px solid #f3dd9b; border-radius: 12px; padding: 12px 14px; margin: 0 0 18px; font-size: 14px; color: var(--text); }
+.quote__note p { margin: 0; }
+.quote__note .ex-icon { color: #b07d00; flex: none; margin-top: 2px; }
+.quote__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 12px; }
+.quote__grid .field { grid-column: span 2; }
+.quote__grid .field:has(input[name=size]) { grid-column: span 3; }
+.quote__grid .field--s { grid-column: span 1; }
+.quote__grid .field--wide { grid-column: 1 / -1; }
+.quote__submit { width: 100%; justify-content: center; }
+.quote__submit.is-loading { opacity: .7; pointer-events: none; }
+.quote__hint { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+.quote__hint .ex-icon { color: var(--green); flex: none; }
+.quote-done { text-align: center; padding: 26px 10px 10px; }
+.quote-done__title { font: 700 22px/1.2 var(--display); color: var(--ink); margin: 0 0 8px; }
+.quote-done p { color: var(--muted); }
+.finish-opt span { align-content: start; }
+@media (max-width: 560px) {
+	.quote__grid { grid-template-columns: 1fr 1fr; }
+	.quote__grid .field, .quote__grid .field:has(input[name=size]) { grid-column: 1 / -1; }
+	.quote__grid .field--s { grid-column: span 1; }
+}
