@@ -41,8 +41,9 @@ add_action(
 		$ver = EXPRINTO_VERSION . '.' . filemtime( EXPRINTO_DIR . '/style.css' );
 		wp_enqueue_style( 'exprinto', get_stylesheet_uri(), array(), $ver );
 
-		wp_register_script( 'exprinto-plate', EXPRINTO_URI . '/assets/js/plate.js', array(), $ver, array( 'strategy' => 'defer', 'in_footer' => true ) );
-		wp_enqueue_script( 'exprinto', EXPRINTO_URI . '/assets/js/theme.js', array( 'exprinto-plate' ), $ver, array( 'strategy' => 'defer', 'in_footer' => true ) );
+		$jsver = function ( $f ) { return EXPRINTO_VERSION . '.' . filemtime( EXPRINTO_DIR . '/assets/js/' . $f ); };
+		wp_register_script( 'exprinto-plate', EXPRINTO_URI . '/assets/js/plate.js', array(), $jsver( 'plate.js' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
+		wp_enqueue_script( 'exprinto', EXPRINTO_URI . '/assets/js/theme.js', array( 'exprinto-plate' ), $jsver( 'theme.js' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
 		wp_localize_script( 'exprinto', 'exprintoData', array(
 			'ajax'     => admin_url( 'admin-ajax.php' ),
 			'currency' => function_exists( 'get_woocommerce_currency_symbol' ) ? html_entity_decode( get_woocommerce_currency_symbol() ) : 'руб.',
