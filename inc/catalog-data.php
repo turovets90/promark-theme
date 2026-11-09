@@ -61,6 +61,8 @@ function exprinto_finishes() {
 	return array(
 		'mirror' => 'Объёмные буквы из акрила',
 		'print'  => 'УФ-печать',
+		'inlay'  => 'Врезные символы',
+		'combo'  => 'Объёмные + врезные',
 	);
 }
 

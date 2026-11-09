@@ -511,3 +511,195 @@ add_action( 'init', function () {
 	}
 	update_option( 'exprinto_catalog_version', 6 );
 }, 26 );
+
+/* -------------------------------------------------------------------------
+ * v7: три новые модели — «Премиум» (объёмные), «Лофт» (врезные), «Рондо» (объёмные + врезные)
+ * ---------------------------------------------------------------------- */
+
+function exprinto_v7_category() {
+	return array(
+		'slug'   => 'tablichki-vreznye-simvoly',
+		'name'   => 'С врезными символами',
+		'parent' => 'adresnye-tablichki',
+		'image'  => 'v3-loft-inlay-black-1.jpg',
+		'desc'   => 'Адресные таблички с врезными символами: буквы и цифры прорезаны в основе из алюминиевого композита, а под ними — зеркальный акрил золотого или серебряного цвета.',
+		'title'  => 'Адресные таблички с врезными символами на заказ | Promark.by',
+		'meta'   => 'Адресные таблички с врезными буквами и цифрами: прорезь в композите и зеркальный акрил под ней. Любой размер и цвет, расчёт за 15 минут, доставка по Беларуси.',
+		'seo'    => '<h2>Что такое врезные символы</h2>
+<p>Буквы и цифры не наклеиваются сверху, а прорезаются лазером в лицевом слое таблички. Под прорезью — лист зеркального акрила, поэтому символы мягко блестят изнутри, а поверхность остаётся идеально ровной. Такую табличку легко мыть, с неё нечему отклеиться, и она выглядит строго и дорого.</p>
+<p>Основа — алюминиевый композит любого цвета, подложка — зеркальное золото или серебро, белый или чёрный акрил. Размер подбираем под фасад, цену называем после расчёта.</p>',
+	);
+}
+
+function exprinto_v7_products() {
+	$size_price = '
+<h3>Размер и цена</h3>
+<p>Размер таблички может быть любым — сделаем под ваш фасад, ворота или столб. Цена зависит от размера, формы и технологии, поэтому мы озвучим её после просчёта заказа: оставьте заявку на этой странице, и мы перезвоним в течение 15 минут в рабочее время.</p>';
+	$how = '
+<h3>Как заказать</h3>
+<p>Впишите название улицы и номер дома, выберите цвета — превью обновится сразу. Оставьте телефон и нажмите «Рассчитать стоимость»: мы перезвоним, назовём цену и пришлём макет в Viber, Telegram или на e-mail. После согласования изготовим табличку за 2–3 рабочих дня и отправим в любой город Беларуси.</p>';
+	$mat = 'Алюминиевый композит + зеркальный акрил';
+	return array(
+		array(
+			'slug'  => 'adresnaya-tablichka-premium-obemnye-bukvy-chernaya',
+			'style' => '«Премиум»',
+			'name'  => 'Адресная табличка «Премиум» с объёмными буквами на акриловом стекле, чёрная',
+			'cfg'   => array( 'layout' => 'premium', 'w' => 600, 'h' => 380, 'finish' => 'mirror', 'finishes' => 'mirror,print', 'base' => 'black', 'metal' => 'silver', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats'  => array( 'adresnye-tablichki', 'tablichki-obemnye-bukvy' ),
+			'img'   => 'v3-premium-black',
+			'material' => $mat,
+			'tech'  => array( 'Технология' => 'Объёмные буквы из акрила, лазерная резка', 'Подложка' => 'Прозрачное акриловое стекло', 'Цвет букв' => 'Зеркальное серебро, золото, белый или чёрный акрил', 'Крепление' => 'Дистанционные держатели из нержавеющей стали' ),
+			'short' => '<ul><li>Объёмные буквы и цифры из зеркального акрила</li><li>Табличка на прозрачном акриловом стекле и держателях</li><li>Любой размер под ваш фасад</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc'  => '<p>Строгая табличка для современного дома: крупный номер с засечками и адрес капителью под ним. Объёмные буквы из зеркального акрила лежат на тёмной основе из алюминиевого композита, а вся табличка закреплена на прозрачном акриловом стекле — из-за этого она словно парит над стеной.</p>' . $size_price . '
+<h3>Почему эта табличка выглядит дорого</h3>
+<ul>
+<li><strong>Три слоя.</strong> Стекло, основа и объёмные буквы дают глубину и игру света — табличка заметна и днём, и в свете фонаря.</li>
+<li><strong>Дистанционные держатели.</strong> Табличка отстоит от стены на 1,5–2 см, поэтому за ней не скапливается вода и грязь.</li>
+<li><strong>Любые цвета.</strong> Основа — чёрный, графит, синий, зелёный и ещё 5 цветов; буквы — серебро, золото, белый или чёрный акрил.</li>
+<li><strong>Не боится погоды.</strong> Композит не ржавеет и не гнётся, акрил выдерживает мороз до −40 °C и солнце.</li>
+</ul>' . $how,
+		),
+		array(
+			'slug'  => 'adresnaya-tablichka-loft-vreznye-simvoly-chernaya',
+			'style' => '«Лофт»',
+			'name'  => 'Адресная табличка «Лофт» с врезными символами, чёрная с золотом',
+			'cfg'   => array( 'layout' => 'loft', 'w' => 600, 'h' => 300, 'finish' => 'inlay', 'finishes' => 'inlay,mirror', 'base' => 'black', 'metal' => 'gold', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats'  => array( 'adresnye-tablichki', 'tablichki-vreznye-simvoly' ),
+			'img'   => 'v3-loft-inlay-black',
+			'material' => $mat,
+			'tech'  => array( 'Технология' => 'Врезные символы: лазерная прорезь в композите + зеркальный акрил под ней', 'Цвет символов' => 'Зеркальное золото, серебро, белый или чёрный акрил', 'Крепление' => '4 декоративных держателя' ),
+			'short' => '<ul><li>Буквы и цифры прорезаны в основе, под ними — зеркальный акрил</li><li>Ровная поверхность: нечему отклеиться, легко мыть</li><li>Любой размер и цвет основы</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc'  => '<p>Минималистичная табличка в стиле лофт: крупный номер, тонкая линия и адрес под ней. Символы не наклеены, а прорезаны лазером в лицевом слое из алюминиевого композита — сквозь прорезь блестит зеркальный акрил. Получается благородный «утопленный» эффект, как у дорогих табличек из металла.</p>' . $size_price . '
+<h3>Почему врезные символы</h3>
+<ul>
+<li><strong>Ничего не отклеится.</strong> Символы — часть таблички, а не накладка, поэтому их не сорвёт ветром и не повредит при мытье.</li>
+<li><strong>Аккуратный блеск.</strong> Золото или серебро видны только в прорезях — табличка выглядит сдержанно и дорого.</li>
+<li><strong>Точная резка.</strong> Лазер вырезает даже тонкие засечки и мелкий шрифт с ровными краями.</li>
+<li><strong>Любые сочетания.</strong> Основа — чёрный, графит, синий, зелёный, бордовый и другие цвета; подложка — золото, серебро, белый или чёрный акрил.</li>
+</ul>' . $how,
+		),
+		array(
+			'slug'  => 'adresnaya-tablichka-rondo-obemnye-i-vreznye-simvoly',
+			'style' => '«Рондо»',
+			'name'  => 'Адресная табличка «Рондо»: объёмный номер и врезной адрес, чёрная',
+			'cfg'   => array( 'layout' => 'dome', 'w' => 600, 'h' => 400, 'finish' => 'combo', 'finishes' => 'combo,inlay,mirror', 'base' => 'black', 'metal' => 'silver', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats'  => array( 'adresnye-tablichki', 'tablichki-obemnye-bukvy', 'tablichki-vreznye-simvoly' ),
+			'img'   => 'v3-dome-combo-black',
+			'material' => $mat,
+			'tech'  => array( 'Технология' => 'Номер — объёмный акрил, адрес — врезные символы', 'Цвет символов' => 'Зеркальное серебро, золото, белый или чёрный акрил', 'Крепление' => '2 декоративных держателя' ),
+			'short' => '<ul><li>Номер дома — объёмный, из зеркального акрила</li><li>Адрес — врезной: прорезан в основе, под ним зеркало</li><li>Фигурная форма с куполом, любой размер</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc'  => '<p>Табличка, в которой сочетаются две технологии. Номер дома в куполе — объёмный, из зеркального акрила: он выступает над поверхностью и сразу бросается в глаза. Название улицы — врезное: буквы прорезаны в основе, а под ними блестит зеркальный акрил. Получается выразительный акцент на номере и спокойный, аккуратный адрес.</p>' . $size_price . '
+<h3>Почему стоит выбрать «Рондо»</h3>
+<ul>
+<li><strong>Номер видно издалека.</strong> Объёмные зеркальные цифры отражают свет и читаются с дороги.</li>
+<li><strong>Две фактуры на одной табличке.</strong> Объём и прорезь создают глубину, которой нет у обычных табличек.</li>
+<li><strong>Классическая форма.</strong> Купол над номером и рамка подходят к фасадам из кирпича, штукатурки и камня.</li>
+<li><strong>Цвета на выбор.</strong> Основа — чёрный, графит, коричневый и другие; символы — серебро, золото, белый или чёрный акрил.</li>
+</ul>' . $how,
+		),
+	);
+}
+
+add_action( 'init', function () {
+	if ( (int) get_option( 'exprinto_catalog_version' ) >= 7 || ! function_exists( 'wc_get_product' ) || ! function_exists( 'exprinto_import_image' ) ) {
+		return;
+	}
+	@set_time_limit( 300 ); // phpcs:ignore
+
+	// Категория «С врезными символами».
+	$c      = exprinto_v7_category();
+	$parent = get_term_by( 'slug', $c['parent'], 'product_cat' );
+	$term   = get_term_by( 'slug', $c['slug'], 'product_cat' );
+	if ( ! $term ) {
+		$res  = wp_insert_term( $c['name'], 'product_cat', array( 'slug' => $c['slug'], 'description' => $c['desc'], 'parent' => $parent ? $parent->term_id : 0 ) );
+		$term = is_wp_error( $res ) ? null : get_term( $res['term_id'], 'product_cat' );
+	}
+	if ( $term ) {
+		update_term_meta( $term->term_id, 'ex_title', $c['title'] );
+		update_term_meta( $term->term_id, 'ex_desc', $c['meta'] );
+		update_term_meta( $term->term_id, 'ex_seo_text', $c['seo'] );
+		update_term_meta( $term->term_id, 'order', 3 );
+		$img = exprinto_import_image( $c['image'], $c['name'] );
+		if ( $img ) {
+			update_term_meta( $term->term_id, 'thumbnail_id', $img );
+		}
+	}
+
+	$tax_mat = exprinto_ensure_attribute( 'material', 'Материал' );
+	$order   = -3;
+	foreach ( exprinto_v7_products() as $p ) {
+		$existing = get_page_by_path( $p['slug'], OBJECT, 'product' );
+		$product  = $existing ? wc_get_product( $existing->ID ) : new WC_Product_Simple();
+		$product->set_name( $p['name'] );
+		$product->set_slug( $p['slug'] );
+		$product->set_status( 'publish' );
+		$product->set_catalog_visibility( 'visible' );
+		$product->set_regular_price( '' );
+		$product->set_description( $p['desc'] );
+		$product->set_short_description( $p['short'] );
+		$product->set_featured( true );
+		$product->set_reviews_allowed( false );
+		$product->set_menu_order( $order++ );
+		$product->set_sku( 'PM-' . strtoupper( substr( md5( $p['slug'] ), 0, 6 ) ) );
+		$cat_ids = array();
+		foreach ( $p['cats'] as $slug ) {
+			$t = get_term_by( 'slug', $slug, 'product_cat' );
+			if ( $t ) {
+				$cat_ids[] = $t->term_id;
+			}
+		}
+		$product->set_category_ids( $cat_ids );
+
+		$attrs = array();
+		$t     = term_exists( $p['material'], $tax_mat );
+		if ( ! $t ) {
+			$t = wp_insert_term( $p['material'], $tax_mat );
+		}
+		if ( ! is_wp_error( $t ) ) {
+			$a = new WC_Product_Attribute();
+			$a->set_id( wc_attribute_taxonomy_id_by_name( $tax_mat ) );
+			$a->set_name( $tax_mat );
+			$a->set_options( array( is_array( $t ) ? (int) $t['term_id'] : (int) $t ) );
+			$a->set_position( 0 );
+			$a->set_visible( true );
+			$attrs[] = $a;
+		}
+		$pos = 1;
+		foreach ( $p['tech'] + array( 'Комплектация' => 'Табличка, крепёж, защитная плёнка и упаковка' ) as $label => $val ) {
+			$a = new WC_Product_Attribute();
+			$a->set_name( $label );
+			$a->set_options( array( $val ) );
+			$a->set_position( $pos++ );
+			$a->set_visible( true );
+			$attrs[] = $a;
+		}
+		$product->set_attributes( $attrs );
+
+		$images = array();
+		foreach ( array( '-1.jpg', '-3.jpg' ) as $k => $suffix ) {
+			$alt = $p['name'] . ( $k ? ' — варианты цвета' : '' );
+			$id  = exprinto_import_image( $p['img'] . $suffix, $alt, $alt );
+			if ( $id ) {
+				$images[] = $id;
+			}
+		}
+		if ( $images ) {
+			$product->set_image_id( array_shift( $images ) );
+			$product->set_gallery_image_ids( $images );
+		}
+		foreach ( $p['cfg'] as $k => $v ) {
+			$product->update_meta_data( '_ex_' . $k, $v );
+		}
+		$product->update_meta_data( '_ex_style', $p['style'] );
+		$product->save();
+		foreach ( array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() ) as $aid ) {
+			if ( $aid ) {
+				wp_update_post( array( 'ID' => $aid, 'post_parent' => $product->get_id() ) );
+			}
+		}
+	}
+	if ( function_exists( 'wc_delete_product_transients' ) ) {
+		wc_delete_product_transients();
+	}
+	update_option( 'exprinto_catalog_version', 7 );
+}, 27 );

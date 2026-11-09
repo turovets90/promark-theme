@@ -82,16 +82,20 @@
 		if (r) { r.checked = true; var fs = r.closest('fieldset'); var out = fs && $('.swatches__name', fs); if (out) { out.textContent = r.getAttribute('data-name'); } }
 	}
 	/** Переключатель «объёмные / печать». */
-	function setFinishToggle(scope, finish) {
+	function setFinishToggle(scope, finish, allowed) {
 		var box = $('[data-finish-toggle]', scope);
 		if (!box) { return; }
+		if (allowed) {
+			$$('[data-finish-opt]', box).forEach(function (o) { o.hidden = allowed.indexOf(o.getAttribute('data-finish-opt')) < 0; });
+			box.hidden = allowed.length < 2;
+		}
 		var r = box.querySelector('[data-plate="finish"][value="' + finish + '"]');
 		if (r) { r.checked = true; }
 	}
 	/** Показать палитру печати или акрила; скрытая отключается, чтобы не уходить в форму. */
 	function setFinish(scope, finish) {
 		$$('[data-finish-group]', scope).forEach(function (g) {
-			var on = g.getAttribute('data-finish-group') === finish;
+			var on = g.getAttribute('data-finish-group').split(' ').indexOf(finish) >= 0;
 			g.hidden = !on;
 			(g.tagName === 'FIELDSET' ? [g] : $$('fieldset', g)).forEach(function (fs) { fs.disabled = !on; });
 		});
@@ -148,7 +152,7 @@
 				var fin = (form.querySelector('[data-plate="finish"]:checked') || {}).value || current.finish;
 				var mat = $('[data-builder-material]', form);
 				if (mat) {
-					mat.textContent = fin === current.finish ? (current.material || '') : (fin === 'mirror' ? 'Алюминиевый композит + объёмные буквы из акрила' : 'Алюминиевый композит, УФ-печать');
+					mat.textContent = fin === current.finish ? (current.material || '') : ({ mirror: 'Алюминиевый композит + объёмные буквы из акрила', print: 'Алюминиевый композит, УФ-печать', inlay: 'Алюминиевый композит с врезными символами + зеркальный акрил', combo: 'Алюминиевый композит + объёмные и врезные символы' }[fin] || '');
 				}
 			};
 			$$('[data-plate="finish"]', form).forEach(function (r) {
@@ -174,7 +178,7 @@
 					$('[data-builder-id]', form).value = current.id;
 					$('[data-builder-material]', form).textContent = current.material || '';
 					var link = $('[data-builder-link]', form); if (link) { link.href = current.url; }
-					setFinishToggle(form, current.finish);
+					setFinishToggle(form, current.finish, current.finishes);
 					setFinish(form, current.finish);
 					setRadio(form, 'base', current.base); setRadio(form, 'metal', current.metal); setRadio(form, 'text', current.text);
 					showPrice();

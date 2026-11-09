@@ -351,7 +351,7 @@ function exprinto_handle_quote() {
 			'finish' => $finish,
 			'base'   => isset( exprinto_bases()[ $get( 'ex_base' ) ] ) ? $get( 'ex_base' ) : $plate['base'],
 		);
-		if ( 'mirror' === $finish ) {
+		if ( 'print' !== $finish ) {
 			$vals['metal'] = isset( exprinto_metals()[ $get( 'ex_metal' ) ] ) ? $get( 'ex_metal' ) : $plate['metal'];
 		} else {
 			$vals['text'] = isset( exprinto_text_colors()[ $get( 'ex_text' ) ] ) ? $get( 'ex_text' ) : $plate['text'];

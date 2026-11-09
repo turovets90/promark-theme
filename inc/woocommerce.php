@@ -71,16 +71,25 @@ function exprinto_product_plate( $product ) {
 		$v = get_post_meta( $id, '_ex_' . $k, true );
 		return '' === $v || null === $v ? $def : $v;
 	};
-	$finish = 'mirror' === $meta( 'finish' ) ? 'mirror' : 'print';
+	$finish = isset( exprinto_finishes()[ $meta( 'finish' ) ] ) ? $meta( 'finish' ) : 'print';
 	$scheme = $meta( 'scheme', 'white-black' );
+	// Какие технологии можно выбрать у этого товара (по умолчанию — объёмные буквы и печать).
+	$allowed = array_values( array_intersect( array_map( 'trim', explode( ',', (string) $meta( 'finishes', '' ) ) ), array_keys( exprinto_finishes() ) ) );
+	if ( ! $allowed ) {
+		$allowed = in_array( $finish, array( 'mirror', 'print' ), true ) ? array( 'mirror', 'print' ) : array( $finish );
+	}
+	if ( ! in_array( $finish, $allowed, true ) ) {
+		array_unshift( $allowed, $finish );
+	}
 	$split  = exprinto_scheme_split( $scheme );
 	return array(
 		'layout' => $layout,
 		'w'      => (int) $meta( 'w' ),
 		'h'      => (int) $meta( 'h' ),
 		'finish' => $finish,
+		'finishes' => $allowed,
 		'scheme' => $scheme,
-		'base'   => $meta( 'base', 'mirror' === $finish ? 'graphite' : $split[0] ),
+		'base'   => $meta( 'base', 'print' !== $finish ? 'graphite' : $split[0] ),
 		'text'   => $meta( 'text', $split[1] ),
 		'metal'  => $meta( 'metal', 'silver' ),
 		'font'   => (string) $meta( 'font' ),
@@ -117,6 +126,9 @@ function exprinto_layout_names() {
 		'ornate'   => '«Ажур»: фигурная форма с завитками',
 		'vertical' => '«Вертикаль»: цифры одна под другой',
 		'house'    => '«Домовой знак»: номер дома в рамке',
+		'premium'  => '«Премиум»: на акриловом стекле, номер с засечками',
+		'loft'     => '«Лофт»: крупный номер, линия, адрес',
+		'dome'     => '«Рондо»: номер в куполе, адрес в полосе',
 		'quadro'   => 'Компактный: номер сверху',
 		'classic'  => 'Классический с рамкой',
 		'number'   => 'Номер дома (простой)',
@@ -135,8 +147,9 @@ add_action(
 		woocommerce_wp_select( array(
 			'id'      => '_ex_finish',
 			'label'   => 'Технология',
-			'options' => array( 'print' => 'УФ-печать', 'mirror' => 'Объёмные буквы из зеркального акрила' ),
+			'options' => array( 'print' => 'УФ-печать', 'mirror' => 'Объёмные буквы из зеркального акрила', 'inlay' => 'Врезные символы', 'combo' => 'Объёмный номер + врезной адрес' ),
 		) );
+		woocommerce_wp_text_input( array( 'id' => '_ex_finishes', 'label' => 'Технологии на выбор', 'placeholder' => 'mirror,print', 'desc_tip' => true, 'description' => 'Через запятую: mirror — объёмные, print — печать, inlay — врезные, combo — объёмные + врезные. Пусто — объёмные и печать.' ) );
 		$opts = array();
 		foreach ( exprinto_schemes() as $k => $s ) {
 			$opts[ $k ] = $s[0];
@@ -170,7 +183,7 @@ add_action(
 	'woocommerce_admin_process_product_object',
 	function ( $product ) {
 		// phpcs:disable WordPress.Security.NonceVerification -- проверяет WooCommerce.
-		foreach ( array( '_ex_layout', '_ex_w', '_ex_h', '_ex_finish', '_ex_scheme', '_ex_base', '_ex_metal', '_ex_font', '_ex_text' ) as $k ) {
+		foreach ( array( '_ex_layout', '_ex_w', '_ex_h', '_ex_finish', '_ex_finishes', '_ex_scheme', '_ex_base', '_ex_metal', '_ex_font', '_ex_text' ) as $k ) {
 			if ( isset( $_POST[ $k ] ) ) {
 				$product->update_meta_data( $k, sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) );
 			}
@@ -210,7 +223,14 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 		'metal'  => $plate['metal'],
 		'text'   => $plate['text'] ?? 'white',
 	) ) );
-	$mirror  = 'mirror' === $plate['finish'];
+	$mirror  = 'print' !== $plate['finish'];
+	$allowed = $plate['finishes'] ?? array( 'mirror', 'print' );
+	$fdesc   = array(
+		'mirror' => array( 'Объёмные буквы', 'зеркальный или цветной акрил' ),
+		'print'  => array( 'Печать', 'плоская УФ-печать' ),
+		'inlay'  => array( 'Врезные символы', 'прорезаны в основе, под ними — зеркало' ),
+		'combo'  => array( 'Объёмные + врезные', 'номер объёмный, адрес врезной' ),
+	);
 	$types   = exprinto_street_types();
 	?>
 	<div class="plate-fields" data-layout="<?php echo esc_attr( $plate['layout'] ); ?>">
@@ -232,15 +252,15 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 			</label>
 		</div>
 
-		<fieldset class="finish-toggle" data-finish-toggle>
+		<fieldset class="finish-toggle" data-finish-toggle <?php echo count( $allowed ) < 2 ? 'hidden' : ''; ?>>
 			<legend>Надписи</legend>
 			<div class="finish-toggle__list">
 				<?php foreach ( exprinto_finishes() as $fk => $fname ) : ?>
-					<label class="finish-opt">
+					<label class="finish-opt" data-finish-opt="<?php echo esc_attr( $fk ); ?>" <?php echo in_array( $fk, $allowed, true ) ? '' : 'hidden'; ?>>
 						<input type="radio" name="ex_finish" value="<?php echo esc_attr( $fk ); ?>" data-plate="finish" <?php checked( $plate['finish'], $fk ); ?>>
 						<span>
-							<b><?php echo 'mirror' === $fk ? 'Объёмные буквы' : 'Печать'; ?></b>
-							<small><?php echo 'mirror' === $fk ? 'зеркальный или цветной акрил' : 'плоская УФ-печать'; ?></small>
+							<b><?php echo esc_html( $fdesc[ $fk ][0] ); ?></b>
+							<small><?php echo esc_html( $fdesc[ $fk ][1] ); ?></small>
 						</span>
 					</label>
 				<?php endforeach; ?>
@@ -260,8 +280,8 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 			</div>
 		</fieldset>
 
-		<fieldset class="swatches" data-finish-group="mirror" <?php echo $mirror ? '' : 'hidden disabled'; ?>>
-			<legend>Цвет объёмных букв: <b class="swatches__name"><?php echo esc_html( $metals[ $v['metal'] ][0] ?? '' ); ?></b></legend>
+		<fieldset class="swatches" data-finish-group="mirror inlay combo" <?php echo $mirror ? '' : 'hidden disabled'; ?>>
+			<legend>Цвет букв (зеркальный акрил): <b class="swatches__name"><?php echo esc_html( $metals[ $v['metal'] ][0] ?? '' ); ?></b></legend>
 			<div class="metal-list">
 				<?php foreach ( $metals as $key => $m ) : ?>
 					<label class="metal">

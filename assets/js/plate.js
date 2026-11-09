@@ -3,7 +3,9 @@
  * Конструктор на главной, карточка товара, генерация фото товаров.
  *
  * finish: 'print'  — УФ-печать: цветовая схема scheme (фон / текст);
- *         'mirror' — объёмные буквы из зеркального акрила: основа base + металл metal (silver | gold).
+ *         'mirror' — объёмные буквы из зеркального акрила: основа base + металл metal (silver | gold);
+ *         'inlay'  — врезные символы: прорезаны в основе, снизу виден зеркальный акрил metal;
+ *         'combo'  — номер объёмный, остальные надписи врезные.
  */
 (function (root) {
 	'use strict';
@@ -338,7 +340,48 @@
 		return { w: w, h: h, body: out, mount: 'standoffs', rx: w * 0.03 };
 	}
 
+	// «Премиум» (600×380): табличка на акриловом стекле, крупный номер с засечками, адрес капителью.
+	function layoutPremium(o) {
+		var w = o.w || 600, h = o.h || 380, g = Math.round(h * 0.06), out = '', fam = 'serif';
+		var iw = w - g * 2;
+		var num = fit(o.number, 700, F[fam], h * 0.5, iw * 0.72);
+		out += T(w / 2, h * 0.585, num.size, 700, fam, o.number, 'middle');
+		var line = ((o.type ? o.type + ' ' : '') + o.street).toUpperCase();
+		var st = fit(line, 400, F[fam], h * 0.105, iw * 0.8);
+		out += T(w / 2, h * 0.81, st.size, 400, fam, line, 'middle', '%FG%', ' letter-spacing="' + n(st.size * 0.06) + '"');
+		return { w: w, h: h, glass: g, body: out, mount: 'side-standoffs', rx: h * 0.02 };
+	}
+
+	// «Лофт» (600×300): крупный номер, тонкая линия и адрес — символы врезные.
+	function layoutLoft(o) {
+		var w = o.w || 600, h = o.h || 300, out = '', fam = 'sans';
+		var num = fit(o.number, 400, F[fam], h * 0.5, w * 0.6);
+		out += T(w / 2, h * 0.56, num.size, 400, fam, o.number, 'middle');
+		out += R(w * 0.14, h * 0.645, w * 0.72, Math.max(2, h * 0.012), 0);
+		var line = ((o.type ? o.type + ' ' : '') + o.street).toUpperCase();
+		var st = fit(line, 500, F[fam], h * 0.12, w * 0.7);
+		out += T(w / 2, h * 0.835, st.size, 500, fam, line, 'middle', '%FG%', ' letter-spacing="' + n(st.size * 0.08) + '"');
+		return { w: w, h: h, body: out, mount: 'standoffs', rx: h * 0.025 };
+	}
+
+	// «Рондо» (600×400): номер в куполе, адрес в полосе. Номер — объёмный, адрес — врезной (combo).
+	function layoutDome(o) {
+		var w = 600, h = 400, out = '', fam = 'serif';
+		var yb = 150, R0 = 136, cx = w / 2, r = 16;
+		var shape = 'M' + r + ' ' + yb + 'H' + (cx - R0) + 'A' + R0 + ' ' + R0 + ' 0 0 1 ' + (cx + R0) + ' ' + yb +
+			'H' + (w - r) + 'Q' + w + ' ' + yb + ' ' + w + ' ' + (yb + r) + 'V' + (h - r) + 'Q' + w + ' ' + h + ' ' + (w - r) + ' ' + h +
+			'H' + r + 'Q0 ' + h + ' 0 ' + (h - r) + 'V' + (yb + r) + 'Q0 ' + yb + ' ' + r + ' ' + yb + 'Z';
+		var num = fit(o.number, 700, F[fam], 196, R0 * 1.6);
+		var raised = T(cx, 204, num.size, 700, fam, o.number, 'middle');
+		var line = ((o.type ? o.type + ' ' : '') + o.street).toUpperCase();
+		var st = fit(line, 700, F[fam], 46, 460);
+		var inset = T(cx, 334, st.size, 700, fam, line, 'middle', '%FG%', ' letter-spacing="' + n(st.size * 0.05) + '"');
+		inset += R(150, 268, 300, 4, 0);
+		return { w: w, h: h, shape: shape, body: raised + inset, parts: { raised: raised, inset: inset }, border: { inset: 10, width: 3 }, mount: 'side-standoffs' };
+	}
+
 	var LAYOUTS = {
+		premium: layoutPremium, loft: layoutLoft, dome: layoutDome,
 		line: layoutLine, quadro: layoutQuadro, classic: layoutClassic, number: layoutNumber, entrance: layoutEntrance,
 		house: layoutHouse, wave: layoutWave, arch: layoutArch, crest: layoutCrest, ornate: layoutOrnate, vertical: layoutVertical
 	};
@@ -369,6 +412,13 @@
 			[[m * 0.035, h / 2], [w - m * 0.035, h / 2]].forEach(function (p) {
 				out += '<circle cx="' + n(p[0]) + '" cy="' + n(p[1]) + '" r="' + n(r2) + '" fill="' + (light ? '#2a2a2a' : '#d9d9d9') + '"/>';
 			});
+		} else if (kind === 'side-standoffs') {
+			var rs2 = Math.max(6, m * 0.045);
+			[[rs2 * 2.1, h * 0.62], [w - rs2 * 2.1, h * 0.62]].forEach(function (p) {
+				out += '<circle cx="' + n(p[0] + rs2 * 0.12) + '" cy="' + n(p[1] + rs2 * 0.18) + '" r="' + n(rs2) + '" fill="#000" fill-opacity=".35"/>' +
+					'<circle cx="' + n(p[0]) + '" cy="' + n(p[1]) + '" r="' + n(rs2) + '" fill="url(#std' + uid + ')"/>' +
+					'<circle cx="' + n(p[0]) + '" cy="' + n(p[1]) + '" r="' + n(rs2 * 0.62) + '" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="' + n(rs2 * 0.12) + '"/>';
+			});
 		} else if (kind === 'standoffs') {
 			var rs = Math.max(6, m * 0.05), o2 = Math.max(16, m * 0.09);
 			pts = [[o2, o2], [w - o2, o2], [o2, h - o2], [w - o2, h - o2]];
@@ -390,7 +440,7 @@
 		var id = uid;
 		var layout = LAYOUTS[o.layout] ? o.layout : 'line';
 		var def = DEFAULTS[layout] || { type: 'улица', street: 'Солнечная', number: '14' };
-		var finish = o.finish === 'mirror' ? 'mirror' : 'print';
+		var finish = ['mirror', 'inlay', 'combo'].indexOf(o.finish) >= 0 ? o.finish : 'print';
 		var data = {
 			w: +o.w || 900, h: +o.h || 270, finish: finish, font: o.font,
 			type: o.type == null ? def.type : String(o.type).trim(),
@@ -402,7 +452,7 @@
 		}
 
 		var bg, fg, light, metal;
-		if (finish === 'mirror') {
+		if (finish !== 'print') {
 			var b = BASES[o.base] || BASES.graphite;
 			metal = METALS[o.metal] || METALS.silver;
 			bg = b.color;
@@ -421,7 +471,9 @@
 		var w = L.w, h = L.h;
 		var shapeD = L.shape || null;
 		var rx = L.rx != null ? L.rx : Math.min(w, h) * 0.02;
-		var shapeEl = shapeD ? '<path d="' + shapeD + '"' : '<rect width="' + w + '" height="' + h + '" rx="' + n(rx) + '"';
+		var gi = L.glass || 0;
+		var rectAttr = (gi ? 'x="' + gi + '" y="' + gi + '" ' : '') + 'width="' + (w - gi * 2) + '" height="' + (h - gi * 2) + '" rx="' + n(rx) + '"';
+		var shapeEl = shapeD ? '<path d="' + shapeD + '"' : '<rect ' + rectAttr;
 
 		var defs = '<defs>' +
 			'<clipPath id="cp' + id + '">' + shapeEl + '/></clipPath>' +
@@ -433,6 +485,12 @@
 				'<stop offset="0" stop-color="' + s[0] + '"/><stop offset=".22" stop-color="' + s[1] + '"/><stop offset=".42" stop-color="' + s[2] + '"/>' +
 				'<stop offset=".58" stop-color="' + s[3] + '"/><stop offset=".8" stop-color="' + s[4] + '"/><stop offset="1" stop-color="' + s[5] + '"/></linearGradient>' +
 				'<filter id="ds' + id + '" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="' + n(Math.min(w, h) * 0.006) + '" dy="' + n(Math.min(w, h) * 0.012) + '" stdDeviation="' + n(Math.min(w, h) * 0.008) + '" flood-color="#000" flood-opacity=".5"/></filter>';
+			var dd = Math.max(1.8, Math.min(w, h) * 0.011);
+			// Врезные символы: внутренняя тень от кромки прорези.
+			defs += '<filter id="in' + id + '" x="-5%" y="-5%" width="110%" height="110%">' +
+				'<feOffset in="SourceAlpha" dx="' + n(dd * 0.7) + '" dy="' + n(dd) + '" result="o"/><feGaussianBlur in="o" stdDeviation="' + n(dd * 0.55) + '" result="b"/>' +
+				'<feComposite in="SourceAlpha" in2="b" operator="out" result="e"/><feFlood flood-color="#000" flood-opacity=".8"/><feComposite in2="e" operator="in" result="sh"/>' +
+				'<feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="sh"/></feMerge></filter>';
 		}
 		defs += '</defs>';
 
@@ -440,28 +498,42 @@
 		var border = '';
 		if (L.border) {
 			var bi = L.border.inset, bw = L.border.width;
-			var edge = shapeD ? '<path d="' + shapeD + '" fill="none"' : '<rect width="' + w + '" height="' + h + '" rx="' + n(rx) + '" fill="none"';
+			var edge = shapeD ? '<path d="' + shapeD + '" fill="none"' : '<rect ' + rectAttr + ' fill="none"';
 			border = '<g clip-path="url(#cp' + id + ')">' + edge + ' stroke="%FG%" stroke-width="' + n((bi + bw) * 2) + '"/>' + edge + ' stroke="%BG%" stroke-width="' + n(bi * 2) + '"/></g>';
 		}
 
 		var out = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' +
 			esc(o.title || ('Адресная табличка: ' + data.type + ' ' + data.street + ', ' + data.number)) + '" class="ex-plate-svg">' + defs;
 
+		// Акриловое стекло под табличкой.
+		if (gi) {
+			out += '<rect x="1" y="1" width="' + (w - 2) + '" height="' + (h - 2) + '" rx="' + n(rx * 1.6) + '" fill="#e9eef2" fill-opacity=".38" stroke="#ffffff" stroke-opacity=".85" stroke-width="2"/>' +
+				'<rect x="3" y="3" width="' + (w - 6) + '" height="' + (h - 6) + '" rx="' + n(rx * 1.4) + '" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="1"/>';
+		}
 		// Основа.
 		out += shapeEl + ' fill="' + bg + '"/>';
-		if (finish === 'mirror') {
+		if (finish !== 'print') {
 			out += shapeEl + ' fill="url(#sh' + id + ')"/>';
 		}
 		if (light) {
-			out += (shapeD ? '<path d="' + shapeD + '"' : '<rect x=".75" y=".75" width="' + (w - 1.5) + '" height="' + (h - 1.5) + '" rx="' + n(rx) + '"') + ' fill="none" stroke="#000" stroke-opacity=".1" stroke-width="1.5"/>';
+			out += shapeEl + ' fill="none" stroke="#000" stroke-opacity=".1" stroke-width="1.5"/>';
 		}
 
 		// Буквы и рамка.
 		var art = border + L.body;
+		var depth = Math.max(1.2, Math.min(w, h) * 0.006);
+		// «Торец» объёмных букв + зеркальная лицевая сторона.
+		var raisedArt = function (a) {
+			return '<g filter="url(#ds' + id + ')"><g transform="translate(' + n(depth * 0.6) + ' ' + n(depth) + ')">' + tok(a, metal.edge).replace(/%BG%/g, bg) + '</g>' + tok(a, fg) + '</g>';
+		};
+		var insetArt = function (a) { return '<g filter="url(#in' + id + ')">' + tok(a, fg) + '</g>'; };
 		if (finish === 'mirror') {
-			var depth = Math.max(1.2, Math.min(w, h) * 0.006);
-			// «Торец» объёмных букв + зеркальная лицевая сторона.
-			out += '<g filter="url(#ds' + id + ')"><g transform="translate(' + n(depth * 0.6) + ' ' + n(depth) + ')">' + tok(art, metal.edge).replace(/%BG%/g, bg) + '</g>' + tok(art, fg) + '</g>';
+			out += raisedArt(art);
+		} else if (finish === 'inlay') {
+			out += insetArt(art);
+		} else if (finish === 'combo') {
+			var parts = L.parts || { raised: L.body, inset: '' };
+			out += insetArt(border + parts.inset) + raisedArt(parts.raised);
 		} else {
 			out += tok(art, fg);
 		}
@@ -475,7 +547,7 @@
 
 	/** Пропорции макета (для миниатюр форматов). */
 	function ratio(layout, w, h) {
-		var fixed = { wave: [630, 360], arch: [620, 380], crest: [590, 330], ornate: [700, 290] };
+		var fixed = { wave: [630, 360], arch: [620, 380], crest: [590, 330], ornate: [700, 290], dome: [600, 400] };
 		return fixed[layout] ? fixed[layout][0] / fixed[layout][1] : (w / h);
 	}
 
