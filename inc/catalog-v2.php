@@ -703,3 +703,30 @@ add_action( 'init', function () {
 	}
 	update_option( 'exprinto_catalog_version', 7 );
 }, 27 );
+
+/** v8: убрать дубли новых моделей (миграция v7 один раз сработала в двух запросах одновременно). */
+add_action( 'init', function () {
+	if ( (int) get_option( 'exprinto_catalog_version' ) >= 8 || ! add_option( 'exprinto_migration_lock_v8', time(), '', 'no' ) ) {
+		return;
+	}
+	foreach ( exprinto_v7_products() as $p ) {
+		$keep = get_page_by_path( $p['slug'], OBJECT, 'product' );
+		$dups = get_posts( array(
+			'post_type'   => 'product',
+			'post_status' => 'any',
+			'numberposts' => -1,
+			'meta_key'    => '_ex_style', // phpcs:ignore
+			'meta_value'  => $p['style'], // phpcs:ignore
+		) );
+		foreach ( $dups as $d ) {
+			if ( $keep && $d->ID !== $keep->ID && 0 === strpos( $d->post_name, $p['slug'] ) ) {
+				wp_trash_post( $d->ID );
+			}
+		}
+	}
+	if ( function_exists( 'wc_delete_product_transients' ) ) {
+		wc_delete_product_transients();
+	}
+	update_option( 'exprinto_catalog_version', 8 );
+	delete_option( 'exprinto_migration_lock_v8' );
+}, 28 );
