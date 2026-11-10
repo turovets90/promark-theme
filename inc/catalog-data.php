@@ -60,7 +60,7 @@ function exprinto_text_colors() {
 function exprinto_finishes() {
 	return array(
 		'mirror' => 'Объёмные буквы из акрила',
-		'print'  => 'УФ-печать',
+		'print'  => 'УФ-печать или виниловая плёнка',
 		'inlay'  => 'Врезные символы',
 		'combo'  => 'Объёмные + врезные',
 	);

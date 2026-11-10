@@ -227,7 +227,7 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 	$allowed = $plate['finishes'] ?? array( 'mirror', 'print' );
 	$fdesc   = array(
 		'mirror' => array( 'Объёмные буквы', 'зеркальный или цветной акрил' ),
-		'print'  => array( 'Печать', 'плоская УФ-печать' ),
+		'print'  => array( 'Печать', 'УФ-печать или виниловая плёнка' ),
 		'inlay'  => array( 'Врезные символы', 'прорезаны в основе, под ними — зеркало' ),
 		'combo'  => array( 'Объёмные + врезные', 'номер объёмный, адрес врезной' ),
 	);
