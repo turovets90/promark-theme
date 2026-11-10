@@ -152,7 +152,7 @@
 				var fin = (form.querySelector('[data-plate="finish"]:checked') || {}).value || current.finish;
 				var mat = $('[data-builder-material]', form);
 				if (mat) {
-					mat.textContent = fin === current.finish ? (current.material || '') : ({ mirror: 'Алюминиевый композит + объёмные буквы из акрила', print: 'Алюминиевый композит, УФ-печать или виниловая плёнка', inlay: 'Алюминиевый композит с врезными символами + зеркальный акрил', combo: 'Алюминиевый композит + объёмные и врезные символы' }[fin] || '');
+					mat.textContent = fin === current.finish ? (current.material || '') : ({ mirror: 'Алюминиевый композит + объёмные буквы из акрила', print: 'Алюминиевый композит, УФ-печать или виниловая плёнка', inlay: 'Алюминиевый композит с прорезными буквами + зеркальный или цветной акрил', combo: 'Алюминиевый композит + объёмные и врезные символы' }[fin] || '');
 				}
 			};
 			$$('[data-plate="finish"]', form).forEach(function (r) {

@@ -81,6 +81,10 @@ function exprinto_product_plate( $product ) {
 	if ( ! in_array( $finish, $allowed, true ) ) {
 		array_unshift( $allowed, $finish );
 	}
+	// Прорезные буквы можно выбрать у любой модели.
+	if ( ! in_array( 'inlay', $allowed, true ) ) {
+		$allowed[] = 'inlay';
+	}
 	$split  = exprinto_scheme_split( $scheme );
 	return array(
 		'layout' => $layout,
@@ -147,9 +151,9 @@ add_action(
 		woocommerce_wp_select( array(
 			'id'      => '_ex_finish',
 			'label'   => 'Технология',
-			'options' => array( 'print' => 'УФ-печать', 'mirror' => 'Объёмные буквы из зеркального акрила', 'inlay' => 'Врезные символы', 'combo' => 'Объёмный номер + врезной адрес' ),
+			'options' => array( 'print' => 'УФ-печать', 'mirror' => 'Объёмные буквы из зеркального акрила', 'inlay' => 'Прорезные буквы', 'combo' => 'Объёмный номер + врезной адрес' ),
 		) );
-		woocommerce_wp_text_input( array( 'id' => '_ex_finishes', 'label' => 'Технологии на выбор', 'placeholder' => 'mirror,print', 'desc_tip' => true, 'description' => 'Через запятую: mirror — объёмные, print — печать, inlay — врезные, combo — объёмные + врезные. Пусто — объёмные и печать.' ) );
+		woocommerce_wp_text_input( array( 'id' => '_ex_finishes', 'label' => 'Технологии на выбор', 'placeholder' => 'mirror,print', 'desc_tip' => true, 'description' => 'Через запятую: mirror — объёмные, print — печать, inlay — прорезные, combo — объёмные + прорезные. Пусто — объёмные и печать. Прорезные буквы доступны всегда.' ) );
 		$opts = array();
 		foreach ( exprinto_schemes() as $k => $s ) {
 			$opts[ $k ] = $s[0];
@@ -228,8 +232,8 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 	$fdesc   = array(
 		'mirror' => array( 'Объёмные буквы', 'зеркальный или цветной акрил' ),
 		'print'  => array( 'Печать', 'УФ-печать или виниловая плёнка' ),
-		'inlay'  => array( 'Врезные символы', 'прорезаны в основе, под ними — зеркало' ),
-		'combo'  => array( 'Объёмные + врезные', 'номер объёмный, адрес врезной' ),
+		'inlay'  => array( 'Прорезные буквы', 'зеркальный или цветной акрил' ),
+		'combo'  => array( 'Объёмные + прорезные', 'номер объёмный, адрес прорезной' ),
 	);
 	$types   = exprinto_street_types();
 	?>
