@@ -81,8 +81,10 @@ function exprinto_product_plate( $product ) {
 	if ( ! in_array( $finish, $allowed, true ) ) {
 		array_unshift( $allowed, $finish );
 	}
-	// Прорезные буквы можно выбрать у любой модели.
-	if ( ! in_array( 'inlay', $allowed, true ) ) {
+	// Прорезные буквы можно выбрать у любой модели (кроме цифр без основы).
+	if ( 'frameless' === $meta( 'layout' ) ) {
+		$allowed = array( 'mirror' );
+	} elseif ( ! in_array( 'inlay', $allowed, true ) ) {
 		$allowed[] = 'inlay';
 	}
 	$split  = exprinto_scheme_split( $scheme );
@@ -130,6 +132,14 @@ function exprinto_layout_names() {
 		'ornate'   => '«Ажур»: фигурная форма с завитками',
 		'vertical' => '«Вертикаль»: цифры одна под другой',
 		'house'    => '«Домовой знак»: номер дома в рамке',
+		'frameless' => 'Объёмные цифры без основы + планка с адресом',
+		'premline' => '«Премиум Линия»: на стекле, номер слева, линия',
+		'premarch' => '«Премиум Арка»: на стекле, арка сверху',
+		'duo'      => '«Премиум Дуо»: панель с прорезным номером',
+		'square'   => '«Квадро»: номер, улица, плашка',
+		'loftv'    => '«Лофт» вертикальный',
+		'lofts'    => '«Лофт» квадратный',
+		'lofth'    => '«Лофт» с домиком',
 		'premium'  => '«Премиум»: на акриловом стекле, номер с засечками',
 		'loft'     => '«Лофт»: крупный номер, линия, адрес',
 		'dome'     => '«Рондо»: номер в куполе, адрес в полосе',
@@ -202,7 +212,7 @@ add_action(
 
 /** Значения полей по умолчанию для макета. */
 function exprinto_plate_defaults( $layout ) {
-	if ( in_array( $layout, array( 'house', 'vertical', 'number' ), true ) ) {
+	if ( in_array( $layout, array( 'house', 'vertical', 'number', 'lofts' ), true ) ) {
 		return array( 'type' => '', 'street' => '' );
 	}
 	if ( 'entrance' === $layout ) {
@@ -271,7 +281,7 @@ function exprinto_plate_fields( $plate, $values = array() ) {
 			</div>
 		</fieldset>
 
-		<fieldset class="swatches">
+		<fieldset class="swatches" data-base-swatches <?php echo 'frameless' === $plate['layout'] ? 'hidden' : ''; ?>>
 			<legend>Цвет основы: <b class="swatches__name"><?php echo esc_html( $bases[ $v['base'] ][0] ?? '' ); ?></b></legend>
 			<div class="swatches__list">
 				<?php foreach ( $bases as $key => $b ) : ?>

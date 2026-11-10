@@ -72,9 +72,10 @@
 		sans:   "'Roboto Condensed', 'Arial Narrow', Arial, sans-serif",
 		serif:  "'PT Serif', Georgia, 'Times New Roman', serif",
 		script: "Lobster, 'PT Serif', Georgia, serif",
-		cond:   "Oswald, 'Roboto Condensed', 'Arial Narrow', sans-serif"
+		cond:   "Oswald, 'Roboto Condensed', 'Arial Narrow', sans-serif",
+		geo:    "Onest, 'Roboto Condensed', Arial, sans-serif"
 	};
-	var CAP = { sans: 0.711, serif: 0.70, script: 0.72, cond: 0.81 };
+	var CAP = { sans: 0.711, serif: 0.70, script: 0.72, cond: 0.81, geo: 0.72 };
 
 	/* ---------- Утилиты ---------- */
 
@@ -364,24 +365,149 @@
 		return { w: w, h: h, body: out, mount: 'standoffs', rx: h * 0.025 };
 	}
 
-	// «Рондо» (600×400): номер в куполе, адрес в полосе. Номер — объёмный, адрес — врезной (combo).
+	/** Прямоугольник с аркой по центру сверху (дуга по хорде bw и высоте подъёма). */
+	function archShape(x0, y0, x1, y1, yb, bw, r) {
+		var cx = (x0 + x1) / 2, sg = yb - y0, R0 = (bw * bw / 4 + sg * sg) / (2 * sg);
+		return 'M' + n(x0 + r) + ' ' + n(yb) + 'H' + n(cx - bw / 2) + 'A' + n(R0) + ' ' + n(R0) + ' 0 0 1 ' + n(cx + bw / 2) + ' ' + n(yb) +
+			'H' + n(x1 - r) + 'Q' + n(x1) + ' ' + n(yb) + ' ' + n(x1) + ' ' + n(yb + r) + 'V' + n(y1 - r) + 'Q' + n(x1) + ' ' + n(y1) + ' ' + n(x1 - r) + ' ' + n(y1) +
+			'H' + n(x0 + r) + 'Q' + n(x0) + ' ' + n(y1) + ' ' + n(x0) + ' ' + n(y1 - r) + 'V' + n(yb + r) + 'Q' + n(x0) + ' ' + n(yb) + ' ' + n(x0 + r) + ' ' + n(yb) + 'Z';
+	}
+	function addrLine(o, upper) {
+		var t = ((o.type ? o.type + ' ' : '') + o.street).trim();
+		return upper ? t.toUpperCase() : t;
+	}
+
+	// «Рондо» (600×400): на акриловом стекле, номер в куполе, адрес в полосе. Номер — объёмный, адрес — прорезной (combo).
 	function layoutDome(o) {
-		var w = 600, h = 400, out = '', fam = 'serif';
-		var yb = 150, R0 = 136, cx = w / 2, r = 16;
-		var shape = 'M' + r + ' ' + yb + 'H' + (cx - R0) + 'A' + R0 + ' ' + R0 + ' 0 0 1 ' + (cx + R0) + ' ' + yb +
-			'H' + (w - r) + 'Q' + w + ' ' + yb + ' ' + w + ' ' + (yb + r) + 'V' + (h - r) + 'Q' + w + ' ' + h + ' ' + (w - r) + ' ' + h +
-			'H' + r + 'Q0 ' + h + ' 0 ' + (h - r) + 'V' + (yb + r) + 'Q0 ' + yb + ' ' + r + ' ' + yb + 'Z';
-		var num = fit(o.number, 700, F[fam], 196, R0 * 1.6);
-		var raised = T(cx, 204, num.size, 700, fam, o.number, 'middle');
-		var line = ((o.type ? o.type + ' ' : '') + o.street).toUpperCase();
-		var st = fit(line, 700, F[fam], 46, 460);
-		var inset = T(cx, 334, st.size, 700, fam, line, 'middle', '%FG%', ' letter-spacing="' + n(st.size * 0.05) + '"');
-		inset += R(150, 268, 300, 4, 0);
-		return { w: w, h: h, shape: shape, body: raised + inset, parts: { raised: raised, inset: inset }, border: { inset: 10, width: 3 }, mount: 'side-standoffs' };
+		var w = 600, h = 400, fam = 'serif', g = 16, cx = w / 2;
+		var shape = archShape(g, g, w - g, h - g, 156, 270, 10);
+		var glass = archShape(0, 0, w, h, 150, 300, 16);
+		var num = fit(o.number, 700, F[fam], 186, 230);
+		var raised = T(cx, 210, num.size, 700, fam, o.number, 'middle');
+		var line = addrLine(o, true);
+		var st = fit(line, 700, F[fam], 44, 440);
+		var inset = T(cx, 330, st.size, 700, fam, line, 'middle', '%FG%', ' letter-spacing="' + n(st.size * 0.05) + '"');
+		inset += R(160, 262, 280, 4, 0);
+		return { w: w, h: h, shape: shape, glassShape: glass, glass: g, body: raised + inset, parts: { raised: raised, inset: inset }, border: { inset: 9, width: 3 }, mount: 'side-standoffs' };
+	}
+
+	// «Премиум Арка» (600×380): на стекле, плавная арка сверху, рамка, номер с засечками.
+	function layoutPremArch(o) {
+		var w = 600, h = 380, fam = 'serif', g = 16, cx = w / 2;
+		var shape = archShape(g, g, w - g, h - g, 112, 330, 10);
+		var glass = archShape(0, 0, w, h, 106, 362, 16);
+		var num = fit(o.number, 700, F[fam], 170, 300);
+		var out = T(cx, 228, num.size, 700, fam, o.number, 'middle');
+		var line = addrLine(o, true);
+		var st = fit(line, 700, F[fam], 46, 450);
+		out += T(cx, 322, st.size, 700, fam, line, 'middle', '%FG%', ' letter-spacing="' + n(st.size * 0.04) + '"');
+		return { w: w, h: h, shape: shape, glassShape: glass, glass: g, body: out, border: { inset: 9, width: 4 }, mount: 'side-standoffs' };
+	}
+
+	// «Премиум Линия» (600×340): на стекле, номер слева сверху, линия, адрес справа.
+	function layoutPremLine(o) {
+		var w = 600, h = 340, g = 18, fam = 'geo';
+		var num = fit(o.number, 400, F[fam], 196, 400);
+		var out = T(g + 40, 192, num.size, 400, fam, o.number, 'start');
+		out += R(g + 34, 222, w - 2 * g - 68, 3, 0);
+		var line = addrLine(o, false);
+		var st = fit(line, 400, F[fam], 38, 420);
+		out += T(w - g - 40, 282, st.size, 400, fam, line, 'end', '%FG%', ' font-style="italic"');
+		return { w: w, h: h, glass: g, body: out, mount: 'side-standoffs', rx: 6 };
+	}
+
+	// «Премиум Дуо» (600×380): на стекле; светлая панель с прорезным номером, адрес объёмными буквами.
+	function layoutDuo(o) {
+		var w = 600, h = 380, g = 18, fam = 'geo';
+		var px = g + 30, py = g + 26, pw = w - 2 * px, ph = 212;
+		var panel = R(px, py, pw, ph, 4);
+		var num = fit(o.number, 600, F[fam], 190, pw * 0.8);
+		var numEl = T(w / 2, py + ph / 2 + num.size * CAP[fam] / 2, num.size, 600, fam, o.number, 'middle', '%BG%', ' filter="%INF%"');
+		var line = addrLine(o, false);
+		var st = fit(line, 400, F[fam], 50, pw * 0.9);
+		var street = T(px, h - g - 34, st.size, 400, fam, line, 'start');
+		var raised = panel + numEl + street;
+		return { w: w, h: h, glass: g, body: raised, parts: { raised: raised, inset: '' }, mount: 'side-standoffs', rx: 6 };
+	}
+
+	// «Квадрат» (320×320): крупный номер, название улицы, плашка «улица».
+	function layoutSquare(o) {
+		var w = 320, h = 320, fam = 'sans', out = '';
+		var num = fit(o.number, 700, F[fam], 150, 250);
+		out += T(w / 2, 158, num.size, 700, fam, o.number, 'middle');
+		var st = fit(String(o.street).toUpperCase(), 700, F[fam], 44, 262);
+		out += T(w / 2, 222, st.size, 700, fam, String(o.street).toUpperCase(), 'middle');
+		if (o.type) {
+			var ty = fit(o.type, 700, F[fam], 30, 150);
+			var tw = ty.width + 22;
+			out += R(w - 29 - tw, 236, tw, 40, 3) + T(w - 29 - 11, 266, ty.size, 700, fam, o.type, 'end', '%BG%');
+		}
+		return { w: w, h: h, body: out, mount: 'holes', rx: 4 };
+	}
+
+	// Объёмные цифры без основы (600×300): крупный номер и планка с адресом-прорезью, крепятся прямо на фасад.
+	var mseq = 0;
+	function layoutFrameless(o) {
+		var w = 600, h = 300, fam = 'geo', mid = 'fm' + (++mseq);
+		var num = fit(o.number, 700, F[fam], 196, 420);
+		var out = T(w - 40, 196, num.size, 700, fam, o.number, 'end');
+		var line = addrLine(o, true);
+		var st = fit(line, 600, F[fam], 26, 470);
+		var by = 206, bh = 46, bx = 18, bw = w - 36;
+		out += '<mask id="' + mid + '"><rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" fill="#fff"/>' +
+			T(w - 52, by + bh / 2 + st.size * CAP[fam] / 2, st.size, 600, fam, line, 'end', '#000', ' letter-spacing="' + n(st.size * 0.12) + '"') + '</mask>';
+		out += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" fill="%FG%" mask="url(#' + mid + ')"/>';
+		return { w: w, h: h, body: out, mount: 'none', noBase: true };
+	}
+
+	// «Лофт» вертикальный (300×600): номер, линия, адрес в две строки.
+	function layoutLoftV(o) {
+		var w = 300, h = 600, fam = 'geo', out = '';
+		var num = fit(o.number, 400, F[fam], 230, 230);
+		out += T(w / 2, 300, num.size, 400, fam, o.number, 'middle');
+		out += R(48, 346, w - 96, 4, 0);
+		var l1 = String(o.street).toUpperCase(), l2 = String(o.type || '').toUpperCase();
+		var a = fit(l1, 400, F[fam], 36, 220), b = fit(l2 || ' ', 400, F[fam], 36, 220);
+		var sz = Math.min(a.size, b.size);
+		out += T(w / 2, 416, sz, 400, fam, l1, 'middle', '%FG%', ' letter-spacing="' + n(sz * 0.08) + '"');
+		if (l2) { out += T(w / 2, 416 + sz * 1.3, sz, 400, fam, l2, 'middle', '%FG%', ' letter-spacing="' + n(sz * 0.08) + '"'); }
+		return { w: w, h: h, body: out, mount: 'none', rx: 8 };
+	}
+
+	// «Лофт» квадратный (400×400): крупный номер, линия, адрес (необязательно).
+	function layoutLoftS(o) {
+		var w = 400, h = 400, fam = 'serif', out = '';
+		var num = fit(o.number, 700, F[fam], 220, 300);
+		out += T(w / 2, o.street ? 240 : 262, num.size, 700, fam, o.number, 'middle');
+		out += R(56, o.street ? 274 : 300, w - 112, 5, 0);
+		if (o.street) {
+			var line = addrLine(o, true);
+			var st = fit(line, 400, F.geo, 30, 290);
+			out += T(w / 2, 336, st.size, 400, 'geo', line, 'middle', '%FG%', ' letter-spacing="' + n(st.size * 0.08) + '"');
+		}
+		return { w: w, h: h, body: out, mount: 'side-standoffs', rx: 16 };
+	}
+
+	// «Лофт Дом» (600×340): домик, номер, линия и адрес.
+	function layoutLoftH(o) {
+		var w = 600, h = 340, fam = 'geo', out = '';
+		var hs = 130, hx = 52, hy = 60;
+		var P = function (x, y) { return n(hx + x * hs) + ' ' + n(hy + y * hs); };
+		out += '<path fill="%FG%" d="M' + P(0.5, 0) + 'L' + P(1, 0.44) + 'L' + P(0.88, 0.44) + 'L' + P(0.88, 1) + 'L' + P(0.6, 1) + 'L' + P(0.6, 0.68) + 'L' + P(0.4, 0.68) + 'L' + P(0.4, 1) + 'L' + P(0.12, 1) + 'L' + P(0.12, 0.44) + 'L' + P(0, 0.44) + 'Z"/>' +
+			R(hx + 0.72 * hs, hy + 0.06 * hs, 0.1 * hs, 0.24 * hs, 0);
+		var num = fit(o.number, 400, F[fam], 170, 300);
+		out += T(w - 56, 190, num.size, 400, fam, o.number, 'end');
+		out += R(48, 222, w - 96, 4, 0);
+		var line = addrLine(o, false);
+		var st = fit(line, 400, F[fam], 40, w - 140);
+		out += T(w / 2, 290, st.size, 400, fam, line, 'middle');
+		return { w: w, h: h, body: out, mount: 'standoffs', rx: 8 };
 	}
 
 	var LAYOUTS = {
 		premium: layoutPremium, loft: layoutLoft, dome: layoutDome,
+		premarch: layoutPremArch, premline: layoutPremLine, duo: layoutDuo, square: layoutSquare,
+		frameless: layoutFrameless, loftv: layoutLoftV, lofts: layoutLoftS, lofth: layoutLoftH,
 		line: layoutLine, quadro: layoutQuadro, classic: layoutClassic, number: layoutNumber, entrance: layoutEntrance,
 		house: layoutHouse, wave: layoutWave, arch: layoutArch, crest: layoutCrest, ornate: layoutOrnate, vertical: layoutVertical
 	};
@@ -391,6 +517,8 @@
 		wave: { type: 'улица', street: 'Солнечная', number: '14' },
 		vertical: { type: '', street: '', number: '259' },
 		house: { type: '', street: '', number: '14' },
+		lofts: { type: '', street: '', number: '21' },
+		frameless: { type: 'улица', street: 'Солнечная', number: '29А' },
 		entrance: { type: 'Подъезд', street: 'кв. 1–36', number: '2' },
 		number: { type: '', street: 'Солнечная', number: '14' }
 	};
@@ -447,7 +575,7 @@
 			street: (o.street == null || String(o.street).trim() === '') ? def.street : String(o.street).trim(),
 			number: String(o.number || '').trim() || def.number
 		};
-		if (layout === 'house' || layout === 'vertical') {
+		if (layout === 'house' || layout === 'vertical' || layout === 'lofts' || layout === 'number') {
 			data.street = String(o.street || '').trim();
 		}
 
@@ -494,7 +622,7 @@
 		}
 		defs += '</defs>';
 
-		var tok = function (str, fill) { return str.replace(/%FG%/g, fill).replace(/%BG%/g, bg); };
+		var tok = function (str, fill) { return str.replace(/%FG%/g, fill).replace(/%BG%/g, bg).replace(/%INF%/g, metal ? 'url(#in' + id + ')' : 'none'); };
 		var border = '';
 		if (L.border) {
 			var bi = L.border.inset, bw = L.border.width;
@@ -506,16 +634,20 @@
 			esc(o.title || ('Адресная табличка: ' + data.type + ' ' + data.street + ', ' + data.number)) + '" class="ex-plate-svg">' + defs;
 
 		// Акриловое стекло под табличкой.
-		if (gi) {
+		if (gi && L.glassShape) {
+			out += '<path d="' + L.glassShape + '" fill="#e9eef2" fill-opacity=".38" stroke="#ffffff" stroke-opacity=".85" stroke-width="2"/>';
+		} else if (gi) {
 			out += '<rect x="1" y="1" width="' + (w - 2) + '" height="' + (h - 2) + '" rx="' + n(rx * 1.6) + '" fill="#e9eef2" fill-opacity=".38" stroke="#ffffff" stroke-opacity=".85" stroke-width="2"/>' +
 				'<rect x="3" y="3" width="' + (w - 6) + '" height="' + (h - 6) + '" rx="' + n(rx * 1.4) + '" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="1"/>';
 		}
-		// Основа.
-		out += shapeEl + ' fill="' + bg + '"/>';
-		if (finish !== 'print') {
-			out += shapeEl + ' fill="url(#sh' + id + ')"/>';
+		// Основа (у объёмных цифр без основы её нет).
+		if (!L.noBase) {
+			out += shapeEl + ' fill="' + bg + '"/>';
+			if (finish !== 'print') {
+				out += shapeEl + ' fill="url(#sh' + id + ')"/>';
+			}
 		}
-		if (light) {
+		if (light && !L.noBase) {
 			out += shapeEl + ' fill="none" stroke="#000" stroke-opacity=".1" stroke-width="1.5"/>';
 		}
 
@@ -524,7 +656,7 @@
 		var depth = Math.max(1.2, Math.min(w, h) * 0.006);
 		// «Торец» объёмных букв + зеркальная лицевая сторона.
 		var raisedArt = function (a) {
-			return '<g filter="url(#ds' + id + ')"><g transform="translate(' + n(depth * 0.6) + ' ' + n(depth) + ')">' + tok(a, metal.edge).replace(/%BG%/g, bg) + '</g>' + tok(a, fg) + '</g>';
+			return '<g filter="url(#ds' + id + ')"><g transform="translate(' + n(depth * 0.6) + ' ' + n(depth) + ')">' + tok(a, metal.edge) + '</g>' + tok(a, fg) + '</g>';
 		};
 		var insetArt = function (a) { return '<g filter="url(#in' + id + ')">' + tok(a, fg) + '</g>'; };
 		if (finish === 'mirror') {

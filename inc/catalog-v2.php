@@ -730,3 +730,331 @@ add_action( 'init', function () {
 	update_option( 'exprinto_catalog_version', 8 );
 	delete_option( 'exprinto_migration_lock_v8' );
 }, 28 );
+
+/* -------------------------------------------------------------------------
+ * v9: 11 новых моделей по фото + фото в карточки существующих моделей
+ * ---------------------------------------------------------------------- */
+
+function exprinto_v9_blocks() {
+	return array(
+		'size' => '
+<h3>Размер и цена</h3>
+<p>Размер таблички может быть любым — сделаем под ваш фасад, ворота или столб. Цена зависит от размера, формы и технологии, поэтому мы озвучим её после просчёта заказа: оставьте заявку на этой странице, и мы перезвоним в течение 15 минут в рабочее время.</p>',
+		'how'  => '
+<h3>Как заказать</h3>
+<p>Впишите название улицы и номер дома, выберите цвета — превью обновится сразу. Оставьте телефон и нажмите «Рассчитать стоимость»: мы перезвоним, назовём цену и пришлём макет в Viber, Telegram или на e-mail. После согласования изготовим табличку за 2–3 рабочих дня и отправим в любой город Беларуси.</p>',
+		'acryl' => '
+<h3>Почему объёмные буквы из акрила</h3>
+<ul>
+<li><strong>Видно днём и ночью.</strong> Зеркальный акрил отражает солнце, фонари и свет фар.</li>
+<li><strong>Долговечно.</strong> Основа — алюминиевый композит: не ржавеет, не гнётся, не боится мороза до −40 °C.</li>
+<li><strong>Точно.</strong> Буквы и цифры вырезаются лазером, кромки ровные и гладкие.</li>
+<li><strong>Любые цвета.</strong> 9 цветов основы; буквы — зеркальное серебро, золото, белый или чёрный акрил.</li>
+</ul>',
+		'inlay' => '
+<h3>Почему прорезные символы</h3>
+<ul>
+<li><strong>Ничего не отклеится.</strong> Символы — часть таблички, а не накладка: их не сорвёт ветром и не повредит при мытье.</li>
+<li><strong>Сдержанный блеск.</strong> Зеркальное золото или серебро видны только в прорезях — табличка выглядит строго и дорого.</li>
+<li><strong>Точная резка.</strong> Лазер вырезает тонкие линии и засечки с идеально ровными краями.</li>
+<li><strong>Любые сочетания.</strong> Основа — чёрный, графит, синий, зелёный и другие цвета; подложка — золото, серебро, белый или чёрный акрил.</li>
+</ul>',
+		'glass' => '
+<h3>Табличка на акриловом стекле</h3>
+<ul>
+<li><strong>Три слоя.</strong> Прозрачное стекло, основа и символы дают глубину — табличка словно парит над стеной.</li>
+<li><strong>Держатели из нержавейки.</strong> Табличка отстоит от стены на 1,5–2 см, за ней не скапливаются вода и грязь.</li>
+<li><strong>Любые цвета.</strong> Основа — 9 цветов, символы — серебро, золото, белый или чёрный акрил.</li>
+</ul>',
+	);
+}
+
+function exprinto_v9_products() {
+	$b   = exprinto_v9_blocks();
+	$mat = 'Алюминиевый композит + зеркальный акрил';
+	$obm = array( 'adresnye-tablichki', 'tablichki-obemnye-bukvy' );
+	$vrz = array( 'adresnye-tablichki', 'tablichki-vreznye-simvoly' );
+	$tech_glass = array( 'Подложка' => 'Прозрачное акриловое стекло', 'Крепление' => 'Дистанционные держатели из нержавеющей стали' );
+	return array(
+		array(
+			'slug' => 'obemnye-cifry-bez-osnovy-akcent', 'style' => '«Акцент»',
+			'name' => 'Объёмные цифры «Акцент» без основы, с планкой адреса',
+			'cfg'  => array( 'layout' => 'frameless', 'w' => 600, 'h' => 300, 'finish' => 'mirror', 'finishes' => 'mirror', 'base' => 'black', 'metal' => 'black', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => array( 'adresnye-tablichki', 'tablichki-obemnye-bukvy', 'nomera-domov' ), 'img' => 'v4-akcent',
+			'photos' => array( 'foto-s0-00.jpg', 'foto-s1-05.jpg' ), 'material' => 'Акрил',
+			'tech' => array( 'Технология' => 'Объёмные цифры и планка из акрила, лазерная резка', 'Цвет' => 'Чёрный или белый акрил, зеркальное серебро или золото', 'Крепление' => 'Прямо на фасад, на шпильках' ),
+			'short' => '<ul><li>Крупные объёмные цифры без таблички-основы</li><li>Планка с названием улицы, прорезанным насквозь</li><li>Любой размер, чёрный, белый или зеркальный акрил</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Современный номер дома без таблички: крупные объёмные цифры и планка с адресом крепятся прямо на фасад, забор или столб. Название улицы прорезано в планке насквозь — сквозь буквы видна стена. Такой номер выглядит как часть архитектуры дома и хорошо читается с улицы.</p>' . $b['size'] . '
+<h3>Почему без основы</h3>
+<ul>
+<li><strong>Минимализм.</strong> Ничего лишнего — только цифры и адрес, как у современных домов в каталогах архитекторов.</li>
+<li><strong>Контраст с фасадом.</strong> Чёрные цифры на светлой стене, белые — на тёмной; зеркальные — на любой.</li>
+<li><strong>Крепление на шпильках.</strong> Цифры отстоят от стены, отбрасывают тень и смотрятся объёмно.</li>
+</ul>' . $b['how'],
+		),
+		array(
+			'slug' => 'adresnaya-tablichka-premium-liniya-na-stekle', 'style' => '«Премиум Линия»',
+			'name' => 'Адресная табличка «Премиум Линия» на акриловом стекле, объёмные буквы, графит',
+			'cfg'  => array( 'layout' => 'premline', 'w' => 600, 'h' => 340, 'finish' => 'mirror', 'finishes' => 'mirror,print', 'base' => 'graphite', 'metal' => 'silver', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => $obm, 'img' => 'v4-premium-line', 'photos' => array( 'foto-s0-02.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Объёмные буквы из акрила, лазерная резка' ) + $tech_glass,
+			'short' => '<ul><li>Крупный номер слева, тонкая линия и адрес справа</li><li>Объёмные буквы из зеркального акрила</li><li>На прозрачном акриловом стекле и держателях</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Лаконичная табличка в современном стиле: крупный номер в левом верхнем углу, тонкая линия и название улицы курсивом справа. Объёмные буквы из зеркального акрила на тёмной основе, вся табличка — на прозрачном акриловом стекле.</p>' . $b['size'] . $b['glass'] . $b['how'],
+		),
+		array(
+			'slug' => 'adresnaya-tablichka-premium-arka-na-stekle', 'style' => '«Премиум Арка»',
+			'name' => 'Адресная табличка «Премиум Арка» на акриловом стекле, объёмные буквы, графит',
+			'cfg'  => array( 'layout' => 'premarch', 'w' => 600, 'h' => 380, 'finish' => 'mirror', 'finishes' => 'mirror,print', 'base' => 'graphite', 'metal' => 'silver', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => $obm, 'img' => 'v4-premium-arka', 'photos' => array( 'foto-s0-05.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Объёмные буквы и рамка из акрила' ) + $tech_glass,
+			'short' => '<ul><li>Плавная арка сверху и объёмная рамка по контуру</li><li>Номер с засечками и адрес капителью</li><li>На прозрачном акриловом стекле и держателях</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Классическая форма с плавной аркой над номером. Объёмные буквы и рамка по контуру — из зеркального акрила, основа — алюминиевый композит, а под табличкой — прозрачное акриловое стекло того же силуэта. Подходит к фасадам из кирпича, штукатурки и камня.</p>' . $b['size'] . $b['glass'] . $b['how'],
+		),
+		array(
+			'slug' => 'adresnaya-tablichka-premium-duo-na-stekle', 'style' => '«Премиум Дуо»',
+			'name' => 'Адресная табличка «Премиум Дуо»: прорезной номер и объёмный адрес, на акриловом стекле',
+			'cfg'  => array( 'layout' => 'duo', 'w' => 600, 'h' => 380, 'finish' => 'combo', 'finishes' => 'combo,mirror', 'base' => 'black', 'metal' => 'silver', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => array( 'adresnye-tablichki', 'tablichki-obemnye-bukvy', 'tablichki-vreznye-simvoly' ), 'img' => 'v4-premium-duo', 'photos' => array( 'foto-s1-00.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Зеркальная панель с прорезным номером + объёмный адрес' ) + $tech_glass,
+			'short' => '<ul><li>Зеркальная панель с прорезным номером</li><li>Название улицы — объёмными буквами</li><li>Две технологии на одной табличке, на акриловом стекле</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Табличка с двумя технологиями сразу. Сверху — панель из зеркального акрила, в которой прорезан крупный номер: сквозь прорезь видна тёмная основа. Ниже — название улицы объёмными зеркальными буквами. Вся конструкция закреплена на прозрачном акриловом стекле.</p>' . $b['size'] . $b['glass'] . $b['how'],
+		),
+		array(
+			'slug' => 'adresnaya-tablichka-klassik-obemnye-bukvy-korichnevaya', 'style' => '«Классик»',
+			'name' => 'Адресная табличка «Классик» с объёмными буквами из зеркального акрила, коричневая',
+			'cfg'  => array( 'layout' => 'classic', 'w' => 800, 'h' => 200, 'finish' => 'mirror', 'finishes' => 'mirror,print', 'base' => 'brown', 'metal' => 'silver', 'scheme' => 'brown-white', 'text' => 'white' ),
+			'cats' => $obm, 'img' => 'v4-klassik', 'photos' => array( 'foto-s1-03.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Объёмные буквы из акрила, лазерная резка', 'Крепление' => '4 отверстия, саморезы и дюбели в комплекте' ),
+			'short' => '<ul><li>Вытянутая табличка: «улица», название и номер в рамке</li><li>Объёмные буквы из зеркального акрила</li><li>Любой размер и цвет основы</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Узкая классическая табличка с рамкой по контуру: сверху — «улица», под ней крупное название, справа — номер дома на зеркальной плашке. Хорошо смотрится на заборе, воротах и над входом, читается издалека.</p>' . $b['size'] . $b['acryl'] . $b['how'],
+		),
+		array(
+			'slug' => 'adresnaya-tablichka-kvadro-obemnye-bukvy-sinyaya', 'style' => '«Квадро»',
+			'name' => 'Адресная табличка «Квадро» с объёмными буквами из зеркального акрила, синяя',
+			'cfg'  => array( 'layout' => 'square', 'w' => 320, 'h' => 320, 'finish' => 'mirror', 'finishes' => 'mirror,print', 'base' => 'blue', 'metal' => 'silver', 'scheme' => 'blue-white', 'text' => 'white' ),
+			'cats' => $obm, 'img' => 'v4-kvadro', 'photos' => array( 'foto-s1-04.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Объёмные буквы из акрила, лазерная резка', 'Крепление' => '4 отверстия, саморезы и дюбели в комплекте' ),
+			'short' => '<ul><li>Квадратная табличка: крупный номер, улица и плашка «улица»</li><li>Объёмные буквы из зеркального акрила</li><li>Любой размер и цвет основы</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Компактная квадратная табличка, где главное — номер дома. Под ним — название улицы крупными буквами и аккуратная плашка «улица». Подходит для столба ворот, калитки и узкого простенка.</p>' . $b['size'] . $b['acryl'] . $b['how'],
+		),
+		array(
+			'slug' => 'tablichka-nomer-doma-obemnye-cifry-sinyaya', 'style' => '«Номер»',
+			'name' => 'Табличка с номером дома, объёмные цифры из зеркального акрила, синяя',
+			'cfg'  => array( 'layout' => 'number', 'w' => 360, 'h' => 180, 'finish' => 'mirror', 'finishes' => 'mirror,print', 'base' => 'blue', 'metal' => 'silver', 'scheme' => 'blue-white', 'text' => 'white' ),
+			'cats' => array( 'nomera-domov', 'tablichki-obemnye-bukvy' ), 'img' => 'v4-nomer', 'photos' => array( 'foto-s0-04.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Объёмные цифры из акрила, лазерная резка', 'Крепление' => '4 отверстия, саморезы и дюбели в комплекте' ),
+			'short' => '<ul><li>Крупный номер дома, можно с буквой или дробью — 14А, 243/2</li><li>Объёмные цифры из зеркального акрила, рамка по контуру</li><li>Надписи сверху и снизу — по желанию</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Горизонтальная табличка с номером дома: крупные объёмные цифры из зеркального акрила и тонкая рамка. Номер можно дополнить буквой или дробью, а сверху и снизу — добавить название улицы или подпись.</p>' . $b['size'] . $b['acryl'] . $b['how'],
+		),
+		array(
+			'slug' => 'tablichka-nomer-doma-domovoy-znak-obemnye-cifry-chernaya', 'style' => '«Домовой знак»',
+			'name' => 'Табличка с номером дома «Домовой знак», объёмные цифры из зеркального акрила, чёрная',
+			'cfg'  => array( 'layout' => 'house', 'w' => 250, 'h' => 250, 'finish' => 'mirror', 'finishes' => 'mirror,print', 'base' => 'black', 'metal' => 'silver', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => array( 'nomera-domov', 'tablichki-obemnye-bukvy' ), 'img' => 'v4-domovoy-akril', 'photos' => array( 'foto-s0-07.jpg', 'foto-s0-06.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Объёмные цифры и рамка из акрила', 'Крепление' => '4 отверстия, саморезы и дюбели в комплекте' ),
+			'short' => '<ul><li>Квадратная табличка с крупным номером в фигурной рамке</li><li>Объёмные цифры из зеркального акрила</li><li>Можно добавить название улицы под номером</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Классический «домовой знак»: крупный номер в фигурной рамке с вырезанными уголками. Цифры и рамка — объёмные, из зеркального акрила. По желанию под номером добавим линию и название улицы, а сверху — подпись.</p>' . $b['size'] . $b['acryl'] . $b['how'],
+		),
+		array(
+			'slug' => 'adresnaya-tablichka-loft-vertikal-prorezn-simvoly', 'style' => '«Лофт Вертикаль»',
+			'name' => 'Вертикальная табличка «Лофт» с прорезными символами, чёрная',
+			'cfg'  => array( 'layout' => 'loftv', 'w' => 300, 'h' => 600, 'finish' => 'inlay', 'finishes' => 'inlay,mirror', 'base' => 'black', 'metal' => 'silver', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => $vrz, 'img' => 'v4-loft-vertikal', 'photos' => array( 'foto-s2-02.jpg', 'foto-s2-01.jpg', 'foto-s2-03.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Прорезные символы: лазерная прорезь в композите + зеркальный акрил под ней', 'Крепление' => 'Скрытое, на двусторонний скотч и клей или на шпильки' ),
+			'short' => '<ul><li>Узкая вертикальная табличка для простенка у двери</li><li>Номер, линия и адрес прорезаны в основе</li><li>Под прорезями — зеркальное серебро или золото</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Вертикальная табличка для узкого простенка возле входной двери или калитки. Крупный номер, тонкая линия и адрес в две строки прорезаны в основе, а под ними блестит зеркальный акрил. Строгая, современная и очень аккуратная.</p>' . $b['size'] . $b['inlay'] . $b['how'],
+		),
+		array(
+			'slug' => 'tablichka-nomer-doma-loft-kvadrat-prorezn-cifry', 'style' => '«Лофт Квадрат»',
+			'name' => 'Табличка с номером дома «Лофт Квадрат», прорезные цифры, графит с золотом',
+			'cfg'  => array( 'layout' => 'lofts', 'w' => 400, 'h' => 400, 'finish' => 'inlay', 'finishes' => 'inlay,mirror', 'base' => 'graphite', 'metal' => 'gold', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => array( 'adresnye-tablichki', 'tablichki-vreznye-simvoly', 'nomera-domov' ), 'img' => 'v4-loft-kvadrat', 'photos' => array( 'foto-s2-05.jpg', 'foto-s2-06.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Прорезные цифры: лазерная прорезь в композите + зеркальный акрил под ней', 'Крепление' => '2 декоративных держателя' ),
+			'short' => '<ul><li>Квадратная табличка с крупным прорезным номером</li><li>Под прорезями — зеркальное золото или серебро</li><li>По желанию — название улицы под линией</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Квадратная табличка с номером дома: крупные цифры с засечками и линия под ними прорезаны в основе, а в прорезях блестит зеркальное золото. По желанию добавим название улицы. Крепится на двух декоративных держателях.</p>' . $b['size'] . $b['inlay'] . $b['how'],
+		),
+		array(
+			'slug' => 'adresnaya-tablichka-loft-dom-prorezn-simvoly', 'style' => '«Лофт Дом»',
+			'name' => 'Адресная табличка «Лофт Дом» с домиком, прорезные символы, чёрная с золотом',
+			'cfg'  => array( 'layout' => 'lofth', 'w' => 600, 'h' => 340, 'finish' => 'inlay', 'finishes' => 'inlay,mirror', 'base' => 'black', 'metal' => 'gold', 'scheme' => 'black-white', 'text' => 'white' ),
+			'cats' => $vrz, 'img' => 'v4-loft-dom', 'photos' => array( 'foto-s2-08.jpg' ), 'material' => $mat,
+			'tech' => array( 'Технология' => 'Прорезные символы: лазерная прорезь в композите + зеркальный акрил под ней', 'Крепление' => '4 декоративных держателя' ),
+			'short' => '<ul><li>Силуэт домика, номер, линия и адрес</li><li>Все символы прорезаны в основе, под ними — зеркальный акрил</li><li>Любой размер и цвет основы</li><li>Цену назовём после просчёта заказа</li></ul>',
+			'desc' => '<p>Уютная табличка с силуэтом домика: слева — домик, справа — номер, ниже — линия и адрес. Всё прорезано лазером в основе, а под прорезями — зеркальное золото или серебро. Вместо адреса можно написать название дома или фамилию семьи.</p>' . $b['size'] . $b['inlay'] . $b['how'],
+		),
+	);
+}
+
+/** Фото к существующим моделям (slug => файлы) и обновлённые картинки. */
+function exprinto_v9_photos() {
+	return array(
+		'adresnaya-tablichka-premium-obemnye-bukvy-chernaya'      => array( 'foto-s0-01.jpg' ),
+		'adresnaya-tablichka-gerb-obemnye-bukvy-korichnevaya'     => array( 'foto-s0-03.jpg' ),
+		'adresnaya-tablichka-rondo-obemnye-i-vreznye-simvoly'     => array( 'foto-s1-01.jpg' ),
+		'vertikalnaya-tablichka-nomer-doma-obemnye-cifry-grafit'  => array( 'foto-s1-02.jpg' ),
+		'adresnaya-tablichka-loft-vreznye-simvoly-chernaya'       => array( 'foto-s2-00.jpg', 'foto-s2-04.jpg', 'foto-s2-07.jpg' ),
+	);
+}
+
+/** Создать/обновить один товар v9. */
+function exprinto_v9_save_product( $p, $order ) {
+	$existing = get_page_by_path( $p['slug'], OBJECT, 'product' );
+	$product  = $existing ? wc_get_product( $existing->ID ) : new WC_Product_Simple();
+	$product->set_name( $p['name'] );
+	$product->set_slug( $p['slug'] );
+	$product->set_status( 'publish' );
+	$product->set_catalog_visibility( 'visible' );
+	$product->set_regular_price( '' );
+	$product->set_description( $p['desc'] );
+	$product->set_short_description( $p['short'] );
+	$product->set_reviews_allowed( false );
+	$product->set_menu_order( $order );
+	$product->set_sku( 'PM-' . strtoupper( substr( md5( $p['slug'] ), 0, 6 ) ) );
+	$cat_ids = array();
+	foreach ( $p['cats'] as $slug ) {
+		$t = get_term_by( 'slug', $slug, 'product_cat' );
+		if ( $t ) {
+			$cat_ids[] = $t->term_id;
+		}
+	}
+	$product->set_category_ids( $cat_ids );
+
+	$tax_mat = exprinto_ensure_attribute( 'material', 'Материал' );
+	$attrs   = array();
+	$t       = term_exists( $p['material'], $tax_mat );
+	if ( ! $t ) {
+		$t = wp_insert_term( $p['material'], $tax_mat );
+	}
+	if ( ! is_wp_error( $t ) ) {
+		$a = new WC_Product_Attribute();
+		$a->set_id( wc_attribute_taxonomy_id_by_name( $tax_mat ) );
+		$a->set_name( $tax_mat );
+		$a->set_options( array( is_array( $t ) ? (int) $t['term_id'] : (int) $t ) );
+		$a->set_position( 0 );
+		$a->set_visible( true );
+		$attrs[] = $a;
+	}
+	$pos = 1;
+	foreach ( $p['tech'] + array( 'Комплектация' => 'Табличка, крепёж, защитная плёнка и упаковка' ) as $label => $val ) {
+		$a = new WC_Product_Attribute();
+		$a->set_name( $label );
+		$a->set_options( array( $val ) );
+		$a->set_position( $pos++ );
+		$a->set_visible( true );
+		$attrs[] = $a;
+	}
+	$product->set_attributes( $attrs );
+
+	$main = exprinto_import_image( $p['img'] . '-1.jpg', $p['name'] );
+	$gal  = array();
+	foreach ( $p['photos'] as $k => $f ) {
+		$id = exprinto_import_image( $f, $p['name'] . ' — фото ' . ( $k + 1 ) );
+		if ( $id ) {
+			$gal[] = $id;
+		}
+	}
+	$var = exprinto_import_image( $p['img'] . '-3.jpg', $p['name'] . ' — варианты цвета' );
+	if ( $var ) {
+		$gal[] = $var;
+	}
+	if ( $main ) {
+		$product->set_image_id( $main );
+	}
+	$product->set_gallery_image_ids( $gal );
+	foreach ( $p['cfg'] as $k => $v ) {
+		$product->update_meta_data( '_ex_' . $k, $v );
+	}
+	$product->update_meta_data( '_ex_style', $p['style'] );
+	$product->save();
+	foreach ( array_merge( array( $main ), $gal ) as $aid ) {
+		if ( $aid ) {
+			wp_update_post( array( 'ID' => $aid, 'post_parent' => $product->get_id() ) );
+		}
+	}
+}
+
+add_action( 'init', function () {
+	if ( (int) get_option( 'exprinto_catalog_version' ) >= 9 || ! function_exists( 'wc_get_product' ) || ! function_exists( 'exprinto_import_image' ) ) {
+		return;
+	}
+	// Один запрос за раз; зависшую блокировку снимаем через 5 минут.
+	if ( ! add_option( 'exprinto_v9_lock', time(), '', 'no' ) ) {
+		if ( time() - (int) get_option( 'exprinto_v9_lock' ) < 300 ) {
+			return;
+		}
+		update_option( 'exprinto_v9_lock', time(), false );
+	}
+	@set_time_limit( 300 ); // phpcs:ignore
+
+	$step  = (int) get_option( 'exprinto_v9_step', 0 );
+	$items = exprinto_v9_products();
+	$batch = 3;
+	for ( $i = $step; $i < min( $step + $batch, count( $items ) ); $i++ ) {
+		exprinto_v9_save_product( $items[ $i ], -20 + $i );
+	}
+	$step = $i;
+	update_option( 'exprinto_v9_step', $step, false );
+
+	if ( $step >= count( $items ) ) {
+		// Фото к существующим моделям: фото после главной картинки, «варианты цвета» — в конце.
+		foreach ( exprinto_v9_photos() as $slug => $files ) {
+			$post = get_page_by_path( $slug, OBJECT, 'product' );
+			$prod = $post ? wc_get_product( $post->ID ) : null;
+			if ( ! $prod ) {
+				continue;
+			}
+			$add = array();
+			foreach ( $files as $k => $f ) {
+				$id = exprinto_import_image( $f, $prod->get_name() . ' — фото ' . ( $k + 1 ) );
+				if ( $id ) {
+					$add[] = $id;
+					wp_update_post( array( 'ID' => $id, 'post_parent' => $prod->get_id() ) );
+				}
+			}
+			$gal = array_values( array_diff( $prod->get_gallery_image_ids(), $add ) );
+			$prod->set_gallery_image_ids( array_merge( $add, $gal ) );
+			$prod->save();
+		}
+		// «Рондо» теперь на акриловом стекле — новые картинки.
+		$rondo = get_page_by_path( 'adresnaya-tablichka-rondo-obemnye-i-vreznye-simvoly', OBJECT, 'product' );
+		if ( $rondo && ( $rp = wc_get_product( $rondo->ID ) ) ) {
+			$m = exprinto_import_image( 'v4-rondo-1.jpg', $rp->get_name() );
+			$v = exprinto_import_image( 'v4-rondo-3.jpg', $rp->get_name() . ' — варианты цвета' );
+			$old = array_flip( array_filter( array( $rp->get_image_id() ) ) );
+			$gal = array();
+			foreach ( $rp->get_gallery_image_ids() as $aid ) {
+				$src = (string) get_post_meta( $aid, '_ex_source', true );
+				if ( 0 !== strpos( $src, 'v3-dome-combo' ) ) {
+					$gal[] = $aid;
+				}
+			}
+			if ( $m ) {
+				$rp->set_image_id( $m );
+			}
+			if ( $v ) {
+				$gal[] = $v;
+			}
+			$rp->set_gallery_image_ids( $gal );
+			$rp->save();
+		}
+		// Порядок: премиум-серия, «Лофт», затем остальные новинки.
+		$order = array(
+			'adresnaya-tablichka-premium-obemnye-bukvy-chernaya', 'adresnaya-tablichka-premium-liniya-na-stekle', 'adresnaya-tablichka-premium-arka-na-stekle',
+			'adresnaya-tablichka-premium-duo-na-stekle', 'adresnaya-tablichka-rondo-obemnye-i-vreznye-simvoly', 'adresnaya-tablichka-loft-vreznye-simvoly-chernaya',
+			'adresnaya-tablichka-loft-vertikal-prorezn-simvoly', 'tablichka-nomer-doma-loft-kvadrat-prorezn-cifry', 'adresnaya-tablichka-loft-dom-prorezn-simvoly',
+			'obemnye-cifry-bez-osnovy-akcent', 'adresnaya-tablichka-klassik-obemnye-bukvy-korichnevaya', 'adresnaya-tablichka-kvadro-obemnye-bukvy-sinyaya',
+			'tablichka-nomer-doma-obemnye-cifry-sinyaya', 'tablichka-nomer-doma-domovoy-znak-obemnye-cifry-chernaya',
+		);
+		foreach ( $order as $k => $slug ) {
+			$post = get_page_by_path( $slug, OBJECT, 'product' );
+			if ( $post ) {
+				wp_update_post( array( 'ID' => $post->ID, 'menu_order' => -40 + $k ) );
+			}
+		}
+		if ( function_exists( 'wc_delete_product_transients' ) ) {
+			wc_delete_product_transients();
+		}
+		update_option( 'exprinto_catalog_version', 9 );
+	}
+	delete_option( 'exprinto_v9_lock' );
+}, 29 );

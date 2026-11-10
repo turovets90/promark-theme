@@ -44,7 +44,10 @@
 			document.fonts.load("700 40px 'PT Serif'"),
 			document.fonts.load("400 40px Lobster"),
 			document.fonts.load("700 40px Oswald"),
-			document.fonts.load("500 40px Oswald")
+			document.fonts.load("500 40px Oswald"),
+			document.fonts.load("400 40px Onest"),
+			document.fonts.load("600 40px Onest"),
+			document.fonts.load("700 40px Onest")
 		]).catch(function () {});
 	}
 
@@ -179,6 +182,8 @@
 					$('[data-builder-material]', form).textContent = current.material || '';
 					var link = $('[data-builder-link]', form); if (link) { link.href = current.url; }
 					setFinishToggle(form, current.finish, current.finishes);
+					var bs = $('[data-base-swatches]', form);
+					if (bs) { bs.hidden = current.layout === 'frameless'; }
 					setFinish(form, current.finish);
 					setRadio(form, 'base', current.base); setRadio(form, 'metal', current.metal); setRadio(form, 'text', current.text);
 					showPrice();

@@ -107,6 +107,11 @@ function exprinto_layout_fields( $layout ) {
 			'street' => array( 'Надпись снизу (необязательно)', false ),
 			'number' => array( 'Номер дома', true ),
 		),
+		'lofts'    => array(
+			'type'   => array( 'Тип', false ),
+			'street' => array( 'Название улицы (необязательно)', false ),
+			'number' => array( 'Номер дома', true ),
+		),
 		'house'    => array(
 			'type'   => array( 'Надпись сверху', false ),
 			'street' => array( 'Название улицы (необязательно)', false ),
