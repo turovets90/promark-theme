@@ -13,11 +13,8 @@ add_shortcode(
 	'promark_seller',
 	function () {
 		$legal = trim( (string) exprinto_opt( 'legal' ) );
-		$out   = '<div class="legal-req"><p>' . nl2br( esc_html( $legal ) ) . '</p>';
+		$out   = '<div class="legal-req">' . ( '' !== $legal ? '<p>' . nl2br( esc_html( $legal ) ) . '</p>' : '' );
 		$out  .= '<p>Телефон: <a href="' . esc_attr( exprinto_tel( exprinto_opt( 'phone' ) ) ) . '">' . esc_html( exprinto_opt( 'phone' ) ) . '</a><br>E-mail: <a href="mailto:' . esc_attr( exprinto_opt( 'email' ) ) . '">' . esc_html( exprinto_opt( 'email' ) ) . '</a><br>Сайт: ' . esc_html( wp_parse_url( home_url(), PHP_URL_HOST ) ) . '</p></div>';
-		if ( current_user_can( 'manage_options' ) && ( '' === $legal || false !== strpos( $legal, '000000000' ) ) ) {
-			$out .= '<p class="legal-admin-note">Видно только администратору: укажите настоящие реквизиты (наименование, УНП, юридический адрес, данные о госрегистрации) в «Внешний вид → Настроить → Контакты магазина → Реквизиты продавца».</p>';
-		}
 		return $out;
 	}
 );
