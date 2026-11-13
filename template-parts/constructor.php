@@ -13,7 +13,7 @@ if ( ! function_exists( 'wc_get_products' ) ) {
 
 $products = wc_get_products( array(
 	'status'       => 'publish',
-	'limit'        => 40,
+	'limit'        => 100,
 	'orderby'      => 'menu_order',
 	'order'        => 'ASC',
 	'meta_key'     => '_ex_layout', // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -23,7 +23,7 @@ $products = wc_get_products( array(
 $formats = array();
 foreach ( $products as $p ) {
 	$plate = exprinto_product_plate( $p );
-	if ( ! $plate ) {
+	if ( ! $plate || ! exprinto_in_builder( $p->get_id() ) ) {
 		continue;
 	}
 	$fields    = exprinto_layout_fields( $plate['layout'] );
@@ -45,7 +45,7 @@ foreach ( $products as $p ) {
 // Одинаковая форма и размер в двух технологиях — одна карточка (технология выбирается переключателем).
 $seen = array();
 $formats = array_values( array_filter( $formats, function ( $f ) use ( &$seen ) {
-	$key = $f['layout'] . '-' . $f['w'] . 'x' . $f['h'];
+	$key = 'image' === $f['layout'] ? 'image-' . $f['id'] : $f['layout'] . '-' . $f['w'] . 'x' . $f['h'];
 	if ( isset( $seen[ $key ] ) && $seen[ $key ] !== $f['finish'] ) {
 		return false;
 	}

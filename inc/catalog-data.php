@@ -34,6 +34,7 @@ function exprinto_bases() {
 		'blue'     => array( 'Синий', '#1F4EA6' ),
 		'green'    => array( 'Зелёный', '#1B5A3C' ),
 		'burgundy' => array( 'Бордовый', '#6B1E29' ),
+		'red'      => array( 'Красный', '#B3262E' ),
 		'white'    => array( 'Белый', '#F7F7F5' ),
 		'ivory'    => array( 'Слоновая кость', '#EFE6CF' ),
 		'yellow'   => array( 'Жёлтый', '#F3C433' ),
@@ -73,6 +74,7 @@ function exprinto_metals() {
 		'gold'   => array( 'Зеркальное золото', 'linear-gradient(135deg,#fff4cf,#c99a3c 45%,#fbe7a8 55%,#946a1e)' ),
 		'white'  => array( 'Белый акрил', 'linear-gradient(135deg,#ffffff,#e3e5e8)' ),
 		'black'  => array( 'Чёрный акрил', 'linear-gradient(135deg,#4a4d52,#0c0d0e)' ),
+		'red'    => array( 'Красный акрил', 'linear-gradient(135deg,#ef5a5f,#a3141c 50%,#d63038 60%,#7c0d13)' ),
 	);
 }
 

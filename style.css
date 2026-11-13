@@ -659,7 +659,9 @@ ul.products li.product:hover .card__cta { background: var(--accent); border-colo
 	.nav__mail { margin-top: 8px !important; font-weight: 500 !important; font-size: 15px; }
 	.nav__phone { display: flex; gap: 10px; align-items: center; margin-top: 18px; padding: 14px 12px; background: var(--paper); border-radius: 12px; font-weight: 700; color: var(--ink); text-decoration: none; }
 	.hero__in, .builder, .geo, .b2b__in, .contacts { grid-template-columns: 1fr; }
-	.builder__stage { position: relative; top: 0; }
+	.builder__stage { top: var(--header-h); z-index: 6; background: #fff; margin: 0 -16px; padding: 8px 16px 10px; box-shadow: 0 10px 14px -12px rgba(15, 23, 38, .45); }
+	.builder__stage .wall { min-height: 0; padding: 14px 16px; }
+	.builder__meta { display: none; }
 		.features { grid-template-columns: repeat(2, 1fr); }
 	.steps { grid-template-columns: repeat(2, 1fr); }
 	.step:nth-child(2)::after { display: none; }
@@ -812,3 +814,40 @@ html.modal-open { overflow: hidden; }
 	.quote__grid .field, .quote__grid .field:has(input[name=size]) { grid-column: 1 / -1; }
 	.quote__grid .field--s { grid-column: span 1; }
 }
+
+/* ---------- Превью всегда на виду, пока заполняются поля ---------- */
+.configurator__stage { position: sticky; top: calc(var(--header-h) + 10px); z-index: 4; background: var(--paper); box-shadow: 0 -12px 0 var(--paper), 0 12px 0 var(--paper); }
+.configurator .plate-preview svg { max-height: min(380px, 36vh); }
+.builder .plate-preview svg { max-height: min(380px, 52vh); }
+.admin-bar .configurator__stage, .admin-bar .builder__stage { top: calc(var(--header-h) + 42px); }
+@media (max-width: 1024px) {
+	.configurator__stage { top: var(--header-h); margin: 0 calc(-1 * clamp(16px, 2.4vw, 24px)); padding: 8px clamp(16px, 2.4vw, 24px) 2px; box-shadow: 0 10px 14px -12px rgba(15, 23, 38, .45); }
+	.configurator__stage .wall { padding: 14px 16px; }
+	.configurator .plate-preview svg, .builder .plate-preview svg { max-height: 24vh; }
+	.configurator__note { margin: 8px 0 6px; font-size: 12px; }
+	.admin-bar .configurator__stage, .admin-bar .builder__stage { top: calc(var(--header-h) + 46px); }
+}
+@media (max-width: 600px) {
+	.admin-bar .configurator__stage, .admin-bar .builder__stage { top: var(--header-h); }
+}
+
+/* ---------- Модель «Своя картинка» ---------- */
+.plate-photo { margin: 0; width: 100%; display: grid; gap: 10px; justify-items: center; text-align: center; }
+.plate-photo img { max-width: 100%; max-height: min(340px, 40vh); width: auto; height: auto; border-radius: 10px; box-shadow: 0 16px 22px -12px rgba(15, 23, 38, .45); background: #fff; }
+.plate-photo figcaption { background: rgba(255, 255, 255, .92); border-radius: 10px; padding: 8px 14px; font-size: 14px; color: var(--ink); line-height: 1.4; }
+.plate-photo figcaption small { color: var(--muted); font-size: 12px; }
+.plate-photo--thumb img { max-height: 70px; border-radius: 4px; box-shadow: none; }
+@media (max-width: 1024px) {
+	.plate-photo img { max-height: 20vh; }
+	.plate-photo figcaption small { display: none; }
+}
+
+/* ---------- Юридические страницы ---------- */
+.legal-date { color: var(--muted); font-size: 14px; }
+.entry-content table, .page-content table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; display: block; overflow-x: auto; }
+.entry-content th, .entry-content td, .page-content th, .page-content td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+.entry-content th, .page-content th { background: var(--paper); }
+.legal-req { background: var(--paper); border-radius: 12px; padding: 16px 20px; }
+.legal-admin-note { background: #fff3cd; border: 1px solid #f3dd9b; border-radius: 10px; padding: 10px 14px; font-size: 14px; }
+h1, h2 { overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; }
+@media (max-width: 600px) { .page-title { font-size: clamp(24px, 7vw, 30px); } }

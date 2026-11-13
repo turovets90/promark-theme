@@ -479,8 +479,19 @@ add_action(
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		update_post_meta( $post_id, '_ex_title', sanitize_text_field( wp_unslash( $_POST['ex_title'] ?? '' ) ) );
-		update_post_meta( $post_id, '_ex_desc', sanitize_textarea_field( wp_unslash( $_POST['ex_desc'] ?? '' ) ) );
+		$t = sanitize_text_field( wp_unslash( $_POST['ex_title'] ?? '' ) );
+		$d = sanitize_textarea_field( wp_unslash( $_POST['ex_desc'] ?? '' ) );
+		// У товаров пустые поля заполняются автоматически (их можно отредактировать).
+		if ( ( '' === $t || '' === $d ) && 'product' === get_post_type( $post_id ) && function_exists( 'exprinto_product_seo_auto' ) && function_exists( 'wc_get_product' ) ) {
+			$p = wc_get_product( $post_id );
+			if ( $p && 'publish' === $p->get_status() ) {
+				list( $at, $ad ) = exprinto_product_seo_auto( $p );
+				$t = '' === $t ? $at : $t;
+				$d = '' === $d ? $ad : $d;
+			}
+		}
+		update_post_meta( $post_id, '_ex_title', $t );
+		update_post_meta( $post_id, '_ex_desc', $d );
 	}
 );
 

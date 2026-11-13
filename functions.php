@@ -16,6 +16,8 @@ require EXPRINTO_DIR . '/inc/setup.php';
 require EXPRINTO_DIR . '/inc/template-tags.php';
 require EXPRINTO_DIR . '/inc/customizer.php';
 require EXPRINTO_DIR . '/inc/seo.php';
+require EXPRINTO_DIR . '/inc/seo-products.php';
+require EXPRINTO_DIR . '/inc/legal.php';
 require EXPRINTO_DIR . '/inc/leads.php';
 
 if ( class_exists( 'WooCommerce' ) ) {

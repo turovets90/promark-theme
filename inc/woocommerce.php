@@ -99,7 +99,23 @@ function exprinto_product_plate( $product ) {
 		'text'   => $meta( 'text', $split[1] ),
 		'metal'  => $meta( 'metal', 'silver' ),
 		'font'   => (string) $meta( 'font' ),
+		'image'  => 'image' === $layout ? exprinto_plate_image_url( $id ) : '',
 	);
+}
+
+/** Картинка для модели «Своя картинка»: отдельное фото образца или главное фото товара. */
+function exprinto_plate_image_url( $id ) {
+	$img = (int) get_post_meta( $id, '_ex_image_id', true );
+	if ( ! $img ) {
+		$img = (int) get_post_thumbnail_id( $id );
+	}
+	$url = $img ? wp_get_attachment_image_url( $img, 'large' ) : '';
+	return $url ? $url : wc_placeholder_img_src( 'large' );
+}
+
+/** Показывать ли товар в конструкторе на главной (по умолчанию — да). */
+function exprinto_in_builder( $id ) {
+	return 'no' !== get_post_meta( $id, '_ex_in_builder', true );
 }
 
 /** Схема «фон / текст» → [основа, цвет текста]. */
@@ -125,6 +141,7 @@ function exprinto_scheme_split( $scheme ) {
 function exprinto_layout_names() {
 	return array(
 		''         => '— без персонализации —',
+		'image'    => '★ Своя картинка (фото образца — без живого превью)',
 		'line'     => '«Модерн»: тип в плашке + номер справа',
 		'wave'     => '«Волна»: название рукописным шрифтом, номер в щите',
 		'arch'     => '«Купол»: номер в куполе, название в полосе',
@@ -154,8 +171,23 @@ function exprinto_layout_names() {
 add_action(
 	'woocommerce_product_options_general_product_data',
 	function () {
+		global $post;
 		echo '<div class="options_group"><p class="form-field"><strong style="padding-left:12px">Табличка (онлайн-превью и персонализация)</strong></p>';
-		woocommerce_wp_select( array( 'id' => '_ex_layout', 'label' => 'Макет', 'options' => exprinto_layout_names() ) );
+		woocommerce_wp_checkbox( array(
+			'id'          => '_ex_in_builder',
+			'label'       => 'Показывать в конструкторе',
+			'value'       => exprinto_in_builder( $post->ID ) ? 'yes' : 'no',
+			'cbvalue'     => 'yes',
+			'description' => 'Модель есть в конструкторе на главной. Снимите галочку, чтобы убрать её оттуда (товар останется в каталоге).',
+		) );
+		woocommerce_wp_select( array( 'id' => '_ex_layout', 'label' => 'Макет', 'options' => exprinto_layout_names(), 'desc_tip' => true, 'description' => 'Готовые макеты рисуют живое превью с адресом клиента. «Своя картинка» — показывает фото образца (ниже или главное фото товара), а адрес клиента подписывается под ним.' ) );
+		$img_id  = (int) get_post_meta( $post->ID, '_ex_image_id', true );
+		$img_src = $img_id ? wp_get_attachment_image_url( $img_id, 'medium' ) : '';
+		echo '<p class="form-field ex-image-field"><label>Фото образца для конструктора</label>' .
+			'<input type="hidden" name="_ex_image_id" id="_ex_image_id" value="' . esc_attr( $img_id ? $img_id : '' ) . '">' .
+			'<img id="ex-image-preview" src="' . esc_url( $img_src ) . '" style="max-width:180px;max-height:120px;display:' . ( $img_src ? 'block' : 'none' ) . ';margin:0 0 8px;border-radius:6px">' .
+			'<button type="button" class="button" id="ex-image-pick">Выбрать фото</button> <button type="button" class="button-link-delete" id="ex-image-clear"' . ( $img_src ? '' : ' style="display:none"' ) . '>Убрать</button>' .
+			'<span class="description" style="display:block;margin-top:6px">Только для макета «Своя картинка». Если не выбрано — берётся главное фото товара.</span></p>';
 		woocommerce_wp_text_input( array( 'id' => '_ex_w', 'label' => 'Пропорции превью: ширина', 'type' => 'number', 'desc_tip' => true, 'description' => 'Только для формы превью, покупателю не показывается.' ) );
 		woocommerce_wp_text_input( array( 'id' => '_ex_h', 'label' => 'Пропорции превью: высота', 'type' => 'number' ) );
 		woocommerce_wp_select( array(
@@ -201,6 +233,15 @@ add_action(
 			if ( isset( $_POST[ $k ] ) ) {
 				$product->update_meta_data( $k, sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) );
 			}
+		}
+		$product->update_meta_data( '_ex_in_builder', isset( $_POST['_ex_in_builder'] ) ? 'yes' : 'no' );
+		if ( isset( $_POST['_ex_image_id'] ) ) {
+			$product->update_meta_data( '_ex_image_id', absint( $_POST['_ex_image_id'] ) );
+		}
+		// Своя картинка: пропорции превью берём из фото, если не заданы.
+		if ( isset( $_POST['_ex_layout'] ) && 'image' === $_POST['_ex_layout'] && ( empty( $_POST['_ex_w'] ) || empty( $_POST['_ex_h'] ) ) ) {
+			$product->update_meta_data( '_ex_w', 4 );
+			$product->update_meta_data( '_ex_h', 3 );
 		}
 		// phpcs:enable
 	}
@@ -579,3 +620,73 @@ foreach ( array( 'new_order', 'cancelled_order', 'failed_order' ) as $exprinto_e
 		}
 	);
 }
+
+/* -------------------------------------------------------------------------
+ * Админка: фото образца, колонка «Конструктор» в списке товаров
+ * ---------------------------------------------------------------------- */
+
+add_action(
+	'admin_enqueue_scripts',
+	function ( $hook ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'product' !== $screen->post_type || ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+			return;
+		}
+		wp_enqueue_media();
+		wp_add_inline_script(
+			'jquery-core',
+			"jQuery(function($){var f;$(document).on('click','#ex-image-pick',function(e){e.preventDefault();if(!f){f=wp.media({title:'Фото образца для конструктора',button:{text:'Выбрать'},library:{type:'image'},multiple:false});f.on('select',function(){var a=f.state().get('selection').first().toJSON();$('#_ex_image_id').val(a.id);$('#ex-image-preview').attr('src',(a.sizes&&a.sizes.medium?a.sizes.medium.url:a.url)).show();$('#ex-image-clear').show();});}f.open();});$(document).on('click','#ex-image-clear',function(e){e.preventDefault();$('#_ex_image_id').val('');$('#ex-image-preview').hide();$(this).hide();});});"
+		);
+	}
+);
+
+add_filter(
+	'manage_edit-product_columns',
+	function ( $cols ) {
+		$out = array();
+		foreach ( $cols as $k => $v ) {
+			$out[ $k ] = $v;
+			if ( 'name' === $k ) {
+				$out['ex_builder'] = 'Конструктор';
+			}
+		}
+		return $out;
+	}
+);
+
+add_action(
+	'manage_product_posts_custom_column',
+	function ( $col, $post_id ) {
+		if ( 'ex_builder' !== $col ) {
+			return;
+		}
+		if ( ! get_post_meta( $post_id, '_ex_layout', true ) ) {
+			echo '<span style="color:#999">— нет макета</span>';
+			return;
+		}
+		$on  = exprinto_in_builder( $post_id );
+		$url = wp_nonce_url( admin_url( 'admin-post.php?action=exprinto_builder_toggle&product=' . $post_id ), 'exprinto_builder_toggle_' . $post_id );
+		printf(
+			'<a href="%s" title="%s" style="text-decoration:none;font-weight:600;color:%s">%s</a>',
+			esc_url( $url ),
+			esc_attr( $on ? 'Нажмите, чтобы убрать из конструктора' : 'Нажмите, чтобы добавить в конструктор' ),
+			$on ? '#1a7f37' : '#b32d2e',
+			$on ? '✓ показан' : '✕ скрыт'
+		);
+	},
+	10,
+	2
+);
+
+add_action(
+	'admin_post_exprinto_builder_toggle',
+	function () {
+		$id = absint( $_GET['product'] ?? 0 );
+		if ( ! $id || ! current_user_can( 'edit_post', $id ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ?? '' ), 'exprinto_builder_toggle_' . $id ) ) {
+			wp_die( 'Нет доступа' );
+		}
+		update_post_meta( $id, '_ex_in_builder', exprinto_in_builder( $id ) ? 'no' : 'yes' );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=product' ) );
+		exit;
+	}
+);

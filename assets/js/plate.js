@@ -35,6 +35,7 @@
 		'blue':     { name: 'Синий', color: '#1F4EA6' },
 		'green':    { name: 'Зелёный', color: '#1B5A3C' },
 		'burgundy': { name: 'Бордовый', color: '#6B1E29' },
+		'red':      { name: 'Красный', color: '#B3262E' },
 		'white':    { name: 'Белый', color: '#F7F7F5' },
 		'ivory':    { name: 'Слоновая кость', color: '#EFE6CF' },
 		'yellow':   { name: 'Жёлтый', color: '#F3C433' }
@@ -58,7 +59,8 @@
 		'silver': { name: 'Зеркальное серебро', stops: ['#FBFCFD', '#B9C0C8', '#EEF1F4', '#7E8791', '#DDE2E7', '#9AA2AB'], edge: '#5E656D' },
 		'gold':   { name: 'Зеркальное золото', stops: ['#FFF4CF', '#C99A3C', '#FBE7A8', '#946A1E', '#EBCB7A', '#B4862F'], edge: '#7A5518' },
 		'white':  { name: 'Белый акрил', stops: ['#FFFFFF', '#F1F2F3', '#FFFFFF', '#E3E5E8', '#F7F8F9', '#E9EBEE'], edge: '#B9BEC4' },
-		'black':  { name: 'Чёрный акрил', stops: ['#4A4D52', '#141517', '#3A3D42', '#0C0D0E', '#2C2F33', '#151618'], edge: '#000000' }
+		'black':  { name: 'Чёрный акрил', stops: ['#4A4D52', '#141517', '#3A3D42', '#0C0D0E', '#2C2F33', '#151618'], edge: '#000000' },
+		'red':    { name: 'Красный акрил', stops: ['#F2676C', '#B3151E', '#E0343C', '#8A0E15', '#D12A32', '#9E1219'], edge: '#5C080D' }
 	};
 
 	function isLight(hex) {

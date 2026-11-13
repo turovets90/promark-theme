@@ -64,9 +64,21 @@
 		return { type: get('type'), street: get('street'), number: get('number'), scheme: get('scheme'), base: get('base'), metal: get('metal'), text: get('text'), finish: get('finish') };
 	}
 
+	function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+	/** Разметка превью: живое SVG или фото образца («Своя картинка»). */
+	function plateHTML(cfg, thumb) {
+		if (cfg.layout === 'image') {
+			var addr = [cfg.type, cfg.street].filter(Boolean).join(' ') + (cfg.number ? ', ' + cfg.number : '');
+			return '<figure class="plate-photo' + (thumb ? ' plate-photo--thumb' : '') + '"><img src="' + esc(cfg.image) + '" alt="' + esc(cfg.title || 'Образец таблички') + '" loading="lazy">' +
+				(thumb ? '' : '<figcaption>Ваш адрес: <b>' + esc(addr.trim() || '—') + '</b><br><small>Сделаем по этому образцу с вашим адресом — макет пришлём на согласование.</small></figcaption>') + '</figure>';
+		}
+		return window.ExPlate.svg(cfg);
+	}
+
 	function draw(target, cfg) {
 		if (!window.ExPlate || !target) { return; }
-		target.innerHTML = window.ExPlate.svg(cfg);
+		target.innerHTML = plateHTML(cfg);
+		if (cfg.layout === 'image') { return; }
 		var svg = target.firstChild;
 		if (svg && cfg.w && cfg.h) { target.style.setProperty('--ratio', cfg.w / cfg.h); }
 	}
@@ -146,7 +158,7 @@
 				var f = readFields(form);
 				var fin = f.finish || current.finish;
 				draw(preview, {
-					layout: current.layout, w: current.w, h: current.h, finish: fin, font: current.font,
+					layout: current.layout, w: current.w, h: current.h, finish: fin, font: current.font, image: current.image, title: current.name,
 					base: f.base || current.base, metal: f.metal || current.metal, text: f.text || current.text,
 					type: f.type, street: f.street, number: f.number
 				});
@@ -164,7 +176,7 @@
 			// Миниатюры моделей.
 			$$('[data-format-thumb]', form).forEach(function (el) {
 				var f = formats[+el.getAttribute('data-format-thumb')];
-				el.innerHTML = window.ExPlate.svg({ layout: f.layout, w: f.w, h: f.h, finish: f.finish, font: f.font, scheme: f.scheme, base: f.base, metal: f.metal, text: f.text, title: f.name });
+				el.innerHTML = plateHTML({ layout: f.layout, w: f.w, h: f.h, finish: f.finish, font: f.font, scheme: f.scheme, base: f.base, metal: f.metal, text: f.text, title: f.name, image: f.image }, true);
 			});
 			var setLabels = function (f) {
 				['type', 'street', 'number'].forEach(function (k) {

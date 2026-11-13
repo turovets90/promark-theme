@@ -1058,3 +1058,35 @@ add_action( 'init', function () {
 	}
 	delete_option( 'exprinto_v9_lock' );
 }, 29 );
+
+/** v10: тексты оферты и политики конфиденциальности, Title и Description всех товаров. */
+add_action( 'init', function () {
+	if ( (int) get_option( 'exprinto_catalog_version' ) >= 10 || ! function_exists( 'exprinto_legal_oferta' ) || ! add_option( 'exprinto_migration_lock_v10', time(), '', 'no' ) ) {
+		return;
+	}
+	foreach ( array( 'publichnaya-oferta' => exprinto_legal_oferta(), 'politika-konfidencialnosti' => exprinto_legal_privacy() ) as $slug => $html ) {
+		$page = get_page_by_path( $slug );
+		if ( $page && ( '' === trim( $page->post_content ) || false !== strpos( $page->post_content, 'Шаблон для заполнения' ) ) ) {
+			wp_update_post( array( 'ID' => $page->ID, 'post_content' => $html ) );
+		}
+		if ( $page ) {
+			update_post_meta( $page->ID, '_ex_title', 'publichnaya-oferta' === $slug ? 'Публичная оферта — Promark.by' : 'Политика конфиденциальности — Promark.by' );
+			update_post_meta( $page->ID, '_ex_desc', 'publichnaya-oferta' === $slug ? 'Условия изготовления и продажи адресных табличек: заказ, согласование макета, оплата, доставка, гарантия и возврат.' : 'Как Promark обрабатывает и защищает персональные данные покупателей в соответствии с Законом РБ «О защите персональных данных».' );
+		}
+	}
+	if ( function_exists( 'exprinto_product_seo_map' ) && function_exists( 'wc_get_products' ) ) {
+		$map = exprinto_product_seo_map();
+		foreach ( wc_get_products( array( 'status' => 'publish', 'limit' => -1 ) ) as $p ) {
+			$id = $p->get_id();
+			list( $t, $d ) = $map[ $p->get_slug() ] ?? exprinto_product_seo_auto( $p );
+			if ( ! get_post_meta( $id, '_ex_title', true ) ) {
+				update_post_meta( $id, '_ex_title', $t );
+			}
+			if ( ! get_post_meta( $id, '_ex_desc', true ) ) {
+				update_post_meta( $id, '_ex_desc', $d );
+			}
+		}
+	}
+	update_option( 'exprinto_catalog_version', 10 );
+	delete_option( 'exprinto_migration_lock_v10' );
+}, 30 );
